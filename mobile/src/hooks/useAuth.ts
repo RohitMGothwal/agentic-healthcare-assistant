@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { authApi } from '../api/client';
 
@@ -8,7 +8,7 @@ type AuthContextType = {
   user: User | null;
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string, email?: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authApi.login(username, password);
       await SecureStore.setItemAsync(TOKEN_KEY, response.access_token);
-      const userData = { username };
+      const userData: User = { username };
       await SecureStore.setItemAsync(USER_KEY, JSON.stringify(userData));
       setUser(userData);
     } catch (err: any) {
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [user, login, register, logout, isLoading, error],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return React.createElement(AuthContext.Provider, { value }, children);
 }
 
 export function useAuth() {
