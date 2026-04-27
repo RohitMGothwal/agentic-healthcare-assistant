@@ -10,6 +10,12 @@ export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
+  const handleLogin = () => {
+    if (!username.trim()) return;
+    login(username.trim());
+    navigation.reset({ index: 0, routes: [{ name: 'Main' as never }] });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ThemedText style={styles.title}>Welcome back</ThemedText>
@@ -28,7 +34,7 @@ export default function LoginScreen() {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Login" onPress={() => login(username)} />
+      <Button title="Login" onPress={handleLogin} />
       <View style={styles.linkContainer}>
         <Button title="Create Account" onPress={() => navigation.navigate('Register' as never)} />
       </View>

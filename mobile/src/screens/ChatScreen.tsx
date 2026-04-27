@@ -6,15 +6,24 @@ import OfflineBanner from '../components/OfflineBanner';
 import ThemedText from '../components/ThemedText';
 import { useOfflineQueue } from '../hooks/useOfflineQueue';
 
+type ChatMessage = {
+  text: string;
+  user: boolean;
+};
+
 export default function ChatScreen() {
   const [message, setMessage] = useState('');
-  const [chat, setChat] = useState<Array<{ text: string; user: boolean }>>([]);
+  const [chat, setChat] = useState<ChatMessage[]>([]);
   const { isConnected } = useOfflineQueue();
 
   const send = () => {
-    if (!message.trim()) return;
-    setChat((current) => [...current, { text: message, user: true }]);
-    setChat((current) => [...current, { text: `Bot reply to: ${message}`, user: false }]);
+    const trimmed = message.trim();
+    if (!trimmed) return;
+    setChat((current) => [
+      ...current,
+      { text: trimmed, user: true },
+      { text: `Bot reply to: ${trimmed}`, user: false },
+    ]);
     setMessage('');
   };
 
@@ -44,12 +53,13 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0a0f1e' },
   chatList: { padding: 16 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', padding: 16, gap: 8 },
+  inputRow: { flexDirection: 'row', alignItems: 'center', padding: 16 },
   textInput: {
     flex: 1,
     backgroundColor: '#111827',
     color: '#fff',
     borderRadius: 12,
     padding: 12,
+    marginRight: 8,
   },
 });
