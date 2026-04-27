@@ -1,0 +1,10 @@
+{
+  "welcome": "Bienvenido",
+  "login": "Iniciar sesión",
+  "register": "Registrarse",
+  "dashboard": "Panel",
+  "chat": "Chat",
+  "appointments": "Citas",
+  "healthReport": "Informe de salud",
+  "settings": "Configuración"
+}

@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "Agentic Health",
+    "slug": "agentic-health-assistant",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "agentichealth",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0f1e"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0066ff",
+          "sounds": []
+        }
+      ],
+      [
+        "react-native-voice",
+        {
+          "microphonePermission": "Allow Agentic Health to access the microphone for voice input.",
+          "speechRecognitionPermission": "Allow Agentic Health to access speech recognition."
+        }
+      ]
+    ],
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/YOUR_PROJECT_ID"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.agentichealthassistant",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Used for voice-to-text symptom entry.",
+        "NSMicrophoneUsageDescription": "Used for voice-to-text symptom entry.",
+        "NSLocationWhenInUseUsageDescription": "Used to find nearby clinics in emergency mode."
+      }
+    },
+    "android": {
+      "package": "com.yourcompany.agentichealthassistant",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0a0f1e"
+      },
+      "permissions": [
+        "INTERNET",
+        "RECORD_AUDIO",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "CALL_PHONE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
+    "extra": {
+      "apiBaseUrl": "https://agentic-healthcare.onrender.com/api/v1",
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    }
+  }
+}
