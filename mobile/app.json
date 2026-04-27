@@ -58,7 +58,7 @@
       "favicon": "./assets/icon.png"
     },
     "extra": {
-      "apiBaseUrl": "https://agentic-healthcare.onrender.com/api/v1",
+      "apiBaseUrl": "https://agentic-healthcare-assistant.onrender.com/api/v1",
       "eas": {
         "projectId": "YOUR_EAS_PROJECT_ID"
       }
