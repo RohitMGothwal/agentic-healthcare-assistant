@@ -7,7 +7,8 @@ from app.db.database import get_db
 from app.models.chat import ChatMessage
 from app.models.user import User
 from app.schemas.chat import ChatMessageCreate, ChatMessageResponse
-from app.api.routes.auth import oauth2_scheme, decode_token
+from app.api.routes.auth import oauth2_scheme
+from app.core.security import decode_token
 
 router = APIRouter()
 

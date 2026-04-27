@@ -7,7 +7,8 @@ from app.db.database import get_db
 from app.models.appointment import Appointment, AppointmentStatus
 from app.models.user import User
 from app.schemas.appointment import AppointmentCreate, AppointmentResponse, AppointmentUpdate
-from app.api.routes.auth import oauth2_scheme, decode_token
+from app.api.routes.auth import oauth2_scheme
+from app.core.security import decode_token
 
 router = APIRouter()
 
