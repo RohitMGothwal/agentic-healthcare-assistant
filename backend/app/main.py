@@ -1,10 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 from app.api.routes import auth, chat, appointments, health_report, notifications
 from app.core.config import settings
+from app.db.database import engine, Base
 
-app = FastAPI(title=settings.app_name, version="1.0.0")
+# Create database tables on startup
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(title=settings.app_name, version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

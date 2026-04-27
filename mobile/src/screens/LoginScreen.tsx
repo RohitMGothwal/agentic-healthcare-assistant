@@ -1,30 +1,36 @@
-import { Button, SafeAreaView, StyleSheet, TextInput, View } from 'react-native';
+import { Button, SafeAreaView, StyleSheet, TextInput, View, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import ThemedText from '../components/ThemedText';
 import { useAuth } from '../hooks/useAuth';
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, isLoading, error } = useAuth();
   const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    if (!username.trim()) return;
-    login(username.trim());
-    navigation.reset({ index: 0, routes: [{ name: 'Main' as never }] });
+  const handleLogin = async () => {
+    if (!username.trim() || !password.trim()) return;
+    try {
+      await login(username.trim(), password.trim());
+      navigation.reset({ index: 0, routes: [{ name: 'Main' as never }] });
+    } catch (err) {
+      // Error is handled in useAuth
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ThemedText style={styles.title}>Welcome back</ThemedText>
+      {error && <ThemedText style={styles.error}>{error}</ThemedText>}
       <TextInput
         style={styles.input}
         placeholder="Username"
         placeholderTextColor="#94a3b8"
         value={username}
         onChangeText={setUsername}
+        autoCapitalize="none"
       />
       <TextInput
         style={styles.input}
@@ -34,7 +40,11 @@ export default function LoginScreen() {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Login" onPress={handleLogin} />
+      {isLoading ? (
+        <ActivityIndicator color="#3b82f6" />
+      ) : (
+        <Button title="Login" onPress={handleLogin} />
+      )}
       <View style={styles.linkContainer}>
         <Button title="Create Account" onPress={() => navigation.navigate('Register' as never)} />
       </View>
@@ -61,5 +71,9 @@ const styles = StyleSheet.create({
   },
   linkContainer: {
     marginTop: 16,
+  },
+  error: {
+    color: '#ef4444',
+    marginBottom: 12,
   },
 });
