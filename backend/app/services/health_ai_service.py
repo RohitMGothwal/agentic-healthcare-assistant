@@ -2,7 +2,7 @@ import os
 import json
 import logging
 from typing import Dict, List, Optional
-import openai
+from openai import OpenAI
 from app.core.config import settings
 from app.services.translation_service import TranslationService
 from app.services.vaccination_service import VaccinationService
@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 class HealthAIService:
     def __init__(self):
-        openai.api_key = os.getenv('OPENAI_API_KEY', '')
+        api_key = os.getenv('OPENAI_API_KEY', '')
+        self.client = OpenAI(api_key=api_key) if api_key else None
         self.translation = TranslationService()
         self.vaccination = VaccinationService()
         self.health_db = HealthDatabaseService()
@@ -146,7 +147,7 @@ class HealthAIService:
     async def _handle_symptom_query(self, message: str) -> str:
         """Handle symptom-related queries with AI"""
         try:
-            if not openai.api_key:
+            if not self.client:
                 return self._get_fallback_symptom_response(message)
             
             prompt = f"""You are a helpful health assistant for rural India. A user has described these symptoms: '{message}'
@@ -159,7 +160,7 @@ Provide:
 
 Keep it simple, empathetic, and in bullet points. Add a disclaimer that this is not medical advice."""
             
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful health education assistant for rural communities in India. Provide simple, accurate health information."},
@@ -242,7 +243,7 @@ For more information, visit your nearest health center or call the Health Helpli
     async def _generate_general_health_response(self, message: str) -> str:
         """Generate general health education response"""
         try:
-            if not openai.api_key:
+            if not self.client:
                 return self._get_fallback_health_response()
             
             prompt = f"""You are a health education assistant for rural India. Answer this health question: '{message}'
@@ -255,7 +256,7 @@ Provide:
 
 Keep it friendly and easy to understand."""
             
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful health education assistant for rural communities in India."},

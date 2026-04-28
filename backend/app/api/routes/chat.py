@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Annotated, List
-import openai
-from app.core.config import settings
 from app.db.database import get_db
 from app.models.chat import ChatMessage
 from app.models.user import User
@@ -11,8 +9,6 @@ from app.api.routes.auth import oauth2_scheme
 from app.core.security import decode_token
 
 router = APIRouter()
-
-openai.api_key = settings.openai_api_key or ""
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(get_db)]):
