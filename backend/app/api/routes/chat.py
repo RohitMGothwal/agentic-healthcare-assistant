@@ -7,8 +7,14 @@ from app.models.user import User
 from app.schemas.chat import ChatMessageCreate, ChatMessageResponse
 from app.api.routes.auth import oauth2_scheme
 from app.core.security import decode_token
+from app.services.health_ai_service import HealthAIService
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+# Initialize Health AI Service
+health_ai = HealthAIService()
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(get_db)]):
@@ -48,28 +54,42 @@ async def send_chat(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)]
 ):
-    # Save user message
-    user_message = ChatMessage(
-        user_id=current_user.id,
-        message=message.message,
-        is_user=1
-    )
-    db.add(user_message)
-    db.commit()
-    db.refresh(user_message)
-    
-    # Generate AI response (mock for now, can integrate OpenAI)
-    ai_response = f"I understand you're asking about: {message.message}. This is a healthcare assistant response."
-    
-    # Save AI response
-    bot_message = ChatMessage(
-        user_id=current_user.id,
-        message=ai_response,
-        is_user=0,
-        response=ai_response
-    )
-    db.add(bot_message)
-    db.commit()
-    db.refresh(bot_message)
-    
-    return bot_message
+    try:
+        # Save user message
+        user_message = ChatMessage(
+            user_id=current_user.id,
+            message=message.message,
+            is_user=1
+        )
+        db.add(user_message)
+        db.commit()
+        db.refresh(user_message)
+        
+        # Generate AI response using Health AI Service
+        try:
+            ai_result = await health_ai.process_health_query(
+                message=message.message,
+                phone_number=current_user.username,  # Using username as identifier
+                channel="app"
+            )
+            ai_response = ai_result.get("message", "I'm sorry, I couldn't process your query.")
+        except Exception as ai_error:
+            logger.error(f"AI processing error: {str(ai_error)}")
+            ai_response = "I'm experiencing technical difficulties. Please try again later."
+        
+        # Save AI response
+        bot_message = ChatMessage(
+            user_id=current_user.id,
+            message=ai_response,
+            is_user=0,
+            response=ai_response
+        )
+        db.add(bot_message)
+        db.commit()
+        db.refresh(bot_message)
+        
+        return bot_message
+    except Exception as e:
+        logger.error(f"Chat processing error: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to process message")
