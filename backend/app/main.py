@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.api.routes import auth, chat, appointments, health_report, notifications
+from app.api.routes import auth, chat, appointments, health_report, notifications, chatbot, outbreaks
 from app.core.config import settings
 from app.db.database import engine, Base
 
@@ -27,6 +27,8 @@ app.include_router(chat.router, prefix=f"{settings.api_version}/chat", tags=["ch
 app.include_router(appointments.router, prefix=f"{settings.api_version}/appointments", tags=["appointments"])
 app.include_router(health_report.router, prefix=f"{settings.api_version}/health-report", tags=["health-report"])
 app.include_router(notifications.router, prefix=f"{settings.api_version}/notifications", tags=["notifications"])
+app.include_router(chatbot.router, prefix=f"{settings.api_version}/chatbot", tags=["chatbot"])
+app.include_router(outbreaks.router, prefix=f"{settings.api_version}/outbreaks", tags=["outbreaks"])
 
 
 @app.get("/")
