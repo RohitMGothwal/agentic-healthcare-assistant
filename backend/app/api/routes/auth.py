@@ -28,20 +28,24 @@ def authenticate_user(db: Session, username: str, password: str):
 
 @router.post("/register", response_model=UserResponse)
 async def register(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
-    db_user = get_user_by_username(db, user.username)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    
-    hashed_password = get_password_hash(user.password)
-    db_user = User(
-        username=user.username,
-        email=user.email,
-        hashed_password=hashed_password
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    try:
+        db_user = get_user_by_username(db, user.username)
+        if db_user:
+            raise HTTPException(status_code=400, detail="Username already registered")
+        
+        hashed_password = get_password_hash(user.password)
+        db_user = User(
+            username=user.username,
+            email=user.email,
+            hashed_password=hashed_password
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 @router.post("/login", response_model=Token)
