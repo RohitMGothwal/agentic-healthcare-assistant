@@ -37,11 +37,25 @@ interface Specialist {
 
 const SPECIALISTS: Specialist[] = [
   { id: 'general', name: 'General Physician', icon: 'medical', description: 'Primary healthcare consultation' },
-  { id: 'cardiologist', name: 'Cardiologist', icon: 'heart', description: 'Heart-related issues' },
-  { id: 'dermatologist', name: 'Dermatologist', icon: 'body', description: 'Skin conditions' },
-  { id: 'neurologist', name: 'Neurologist', icon: 'brain', description: 'Brain & nervous system' },
-  { id: 'pediatrician', name: 'Pediatrician', icon: 'happy', description: 'Child healthcare' },
-  { id: 'gynecologist', name: 'Gynecologist', icon: 'woman', description: 'Women\'s health' },
+  { id: 'cardiologist', name: 'Cardiologist', icon: 'heart', description: 'Heart & cardiovascular issues' },
+  { id: 'dermatologist', name: 'Dermatologist', icon: 'body', description: 'Skin, hair & nail conditions' },
+  { id: 'neurologist', name: 'Neurologist', icon: 'brain', description: 'Brain & nervous system disorders' },
+  { id: 'pediatrician', name: 'Pediatrician', icon: 'happy', description: 'Child & adolescent healthcare' },
+  { id: 'gynecologist', name: 'Gynecologist', icon: 'woman', description: 'Women\'s reproductive health' },
+  { id: 'orthopedic', name: 'Orthopedic Surgeon', icon: 'fitness', description: 'Bones, joints & muscles' },
+  { id: 'psychiatrist', name: 'Psychiatrist', icon: 'happy-outline', description: 'Mental health & disorders' },
+  { id: 'dentist', name: 'Dentist', icon: 'sunny', description: 'Dental & oral health' },
+  { id: 'ophthalmologist', name: 'Ophthalmologist', icon: 'eye', description: 'Eye care & vision' },
+  { id: 'ent', name: 'ENT Specialist', icon: 'ear', description: 'Ear, nose & throat conditions' },
+  { id: 'pulmonologist', name: 'Pulmonologist', icon: 'cloud', description: 'Lung & respiratory issues' },
+  { id: 'gastroenterologist', name: 'Gastroenterologist', icon: 'restaurant', description: 'Digestive system disorders' },
+  { id: 'endocrinologist', name: 'Endocrinologist', icon: 'water', description: 'Hormone & metabolic disorders' },
+  { id: 'oncologist', name: 'Oncologist', icon: 'ribbon', description: 'Cancer diagnosis & treatment' },
+  { id: 'urologist', name: 'Urologist', icon: 'man', description: 'Urinary & male reproductive system' },
+  { id: 'nephrologist', name: 'Nephrologist', icon: 'water-outline', description: 'Kidney diseases & disorders' },
+  { id: 'rheumatologist', name: 'Rheumatologist', icon: 'hand-left', description: 'Arthritis & autoimmune diseases' },
+  { id: 'allergist', name: 'Allergist & Immunologist', icon: 'leaf', description: 'Allergies & immune system' },
+  { id: 'emergency', name: 'Emergency Medicine', icon: 'alert-circle', description: 'Urgent & emergency care' },
 ];
 
 export default function ChatScreen() {
@@ -199,8 +213,9 @@ export default function ChatScreen() {
           <TouchableOpacity 
             style={styles.specialistButton}
             onPress={() => setShowSpecialistModal(true)}
+            accessibilityLabel={`Current specialist: ${selectedSpecialist.name}`}
           >
-            <Ionicons name="medical" size={18} color="#fff" />
+            <Ionicons name={selectedSpecialist.icon as any} size={18} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -212,24 +227,33 @@ export default function ChatScreen() {
             <Text style={[styles.modalTitle, isDark && styles.textLight]}>
               Choose Specialist
             </Text>
-            <ScrollView style={styles.specialistList}>
+            <Text style={[styles.modalSubtitle, isDark && styles.textMuted]}>
+              {SPECIALISTS.length} specialists available
+            </Text>
+            <ScrollView style={styles.specialistList} showsVerticalScrollIndicator={true}>
               {SPECIALISTS.map((specialist) => (
                 <TouchableOpacity
                   key={specialist.id}
                   style={[
                     styles.specialistCard,
                     selectedSpecialist.id === specialist.id && styles.selectedSpecialist,
+                    isDark && styles.specialistCardDark,
                   ]}
                   onPress={() => {
                     setSelectedSpecialist(specialist);
                     setShowSpecialistModal(false);
                   }}
                 >
-                  <Ionicons 
-                    name={specialist.icon as any} 
-                    size={24} 
-                    color={selectedSpecialist.id === specialist.id ? '#fff' : '#3b82f6'} 
-                  />
+                  <View style={[
+                    styles.specialistIconContainer,
+                    selectedSpecialist.id === specialist.id && styles.selectedSpecialistIcon,
+                  ]}>
+                    <Ionicons 
+                      name={specialist.icon as any} 
+                      size={22} 
+                      color={selectedSpecialist.id === specialist.id ? '#3b82f6' : '#fff'} 
+                    />
+                  </View>
                   <View style={styles.specialistInfo}>
                     <Text style={[
                       styles.specialistName,
@@ -238,10 +262,16 @@ export default function ChatScreen() {
                     ]}>
                       {specialist.name}
                     </Text>
-                    <Text style={styles.specialistDesc}>{specialist.description}</Text>
+                    <Text style={[
+                      styles.specialistDesc,
+                      selectedSpecialist.id === specialist.id && styles.selectedText,
+                      isDark && styles.textMuted,
+                    ]}>
+                      {specialist.description}
+                    </Text>
                   </View>
                   {selectedSpecialist.id === specialist.id && (
-                    <Ionicons name="checkmark-circle" size={24} color="#fff" />
+                    <Ionicons name="checkmark-circle" size={24} color="#3b82f6" />
                   )}
                 </TouchableOpacity>
               ))}
@@ -471,26 +501,47 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    marginBottom: 16,
+    marginBottom: 4,
     textAlign: 'center',
     color: '#1e293b',
   },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
   specialistList: {
-    maxHeight: 400,
+    maxHeight: 500,
   },
   specialistCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 14,
     borderRadius: 12,
     marginBottom: 8,
     backgroundColor: '#f8fafc',
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
+  specialistCardDark: {
+    backgroundColor: '#374151',
+    borderColor: '#4b5563',
+  },
   selectedSpecialist: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#dbeafe',
     borderColor: '#3b82f6',
+  },
+  specialistIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#3b82f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedSpecialistIcon: {
+    backgroundColor: '#fff',
   },
   specialistInfo: {
     flex: 1,
@@ -508,6 +559,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748b',
     marginTop: 2,
+  },
+  textMuted: {
+    color: '#94a3b8',
   },
   closeButton: {
     marginTop: 16,
@@ -650,8 +704,5 @@ const styles = StyleSheet.create({
   },
   textLight: {
     color: '#f1f5f9',
-  },
-  textMuted: {
-    color: '#94a3b8',
   },
 });

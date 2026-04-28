@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
 
-from app.api.routes import auth, chat, appointments, health_report, notifications, chatbot, outbreaks
+from app.api.routes import auth, chat, appointments, health_report, notifications, chatbot, outbreaks, admin
 from app.core.config import settings
 from app.db.database import engine, Base
 
@@ -38,6 +38,7 @@ app.include_router(health_report.router, prefix=f"{settings.api_version}/health-
 app.include_router(notifications.router, prefix=f"{settings.api_version}/notifications", tags=["notifications"])
 app.include_router(chatbot.router, prefix=f"{settings.api_version}/chatbot", tags=["chatbot"])
 app.include_router(outbreaks.router, prefix=f"{settings.api_version}/outbreaks", tags=["outbreaks"])
+app.include_router(admin.router, prefix=f"{settings.api_version}/admin", tags=["admin"])
 
 
 @app.get("/")

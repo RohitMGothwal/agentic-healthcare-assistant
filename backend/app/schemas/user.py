@@ -15,10 +15,16 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     id: int
     is_active: bool
+    is_admin: bool
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class UserUpdate(BaseModel):
+    is_active: Optional[bool] = None
+    is_admin: Optional[bool] = None
 
 
 class Token(BaseModel):

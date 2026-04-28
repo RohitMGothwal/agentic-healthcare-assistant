@@ -116,3 +116,93 @@ export const healthReportApi = {
     return response.data;
   },
 };
+
+// Admin API
+export const adminApi = {
+  // Dashboard
+  getDashboardStats: async () => {
+    const response = await api.get('/admin/dashboard');
+    return response.data;
+  },
+
+  // Users
+  getUsers: async () => {
+    const response = await api.get('/admin/users');
+    return response.data;
+  },
+
+  updateUser: async (id: number, data: Partial<{ is_active: boolean; is_admin: boolean }>) => {
+    const response = await api.put(`/admin/users/${id}`, data);
+    return response.data;
+  },
+
+  deleteUser: async (id: number) => {
+    const response = await api.delete(`/admin/users/${id}`);
+    return response.data;
+  },
+
+  // Analytics
+  getAnalytics: async (timeRange: string) => {
+    const response = await api.get(`/admin/analytics?range=${timeRange}`);
+    return response.data;
+  },
+
+  // Appointments
+  getAppointments: async () => {
+    const response = await api.get('/admin/appointments');
+    return response.data;
+  },
+
+  updateAppointment: async (id: number, data: Partial<{ status: string }>) => {
+    const response = await api.put(`/admin/appointments/${id}`, data);
+    return response.data;
+  },
+
+  // Content
+  getHealthContent: async () => {
+    const response = await api.get('/admin/content');
+    return response.data;
+  },
+
+  createContent: async (data: any) => {
+    const response = await api.post('/admin/content', data);
+    return response.data;
+  },
+
+  updateContent: async (id: number, data: any) => {
+    const response = await api.put(`/admin/content/${id}`, data);
+    return response.data;
+  },
+
+  deleteContent: async (id: number) => {
+    const response = await api.delete(`/admin/content/${id}`);
+    return response.data;
+  },
+
+  // System
+  getSystemConfig: async () => {
+    const response = await api.get('/admin/system/config');
+    return response.data;
+  },
+
+  updateSystemConfig: async (data: any) => {
+    const response = await api.put('/admin/system/config', data);
+    return response.data;
+  },
+
+  clearCache: async () => {
+    const response = await api.post('/admin/system/clear-cache');
+    return response.data;
+  },
+
+  restartServer: async () => {
+    const response = await api.post('/admin/system/restart');
+    return response.data;
+  },
+
+  // Logs
+  getLogs: async () => {
+    const response = await api.get('/admin/logs');
+    return response.data;
+  },
+};
