@@ -42,4 +42,8 @@ app.include_router(outbreaks.router, prefix=f"{settings.api_version}/outbreaks",
 
 @app.get("/")
 async def root():
-    return {"status": "ok", "message": "Agentic Healthcare API is running"}
+    return {"status": "ok", "message": "Agentic Healthcare API is running", "version": "1.0.1-pbkdf2"}
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
