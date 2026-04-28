@@ -29,7 +29,7 @@ export const authApi = {
     formData.append('username', username);
     formData.append('password', password);
     
-    const response = await api.post('/api/v1/auth/login', formData.toString(), {
+    const response = await api.post('/auth/login', formData.toString(), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -38,7 +38,7 @@ export const authApi = {
   },
   
   register: async (username: string, password: string, email?: string) => {
-    const response = await api.post('/api/v1/auth/register', {
+    const response = await api.post('/auth/register', {
       username,
       password,
       email,
@@ -50,12 +50,12 @@ export const authApi = {
 // Chat API
 export const chatApi = {
   getHistory: async () => {
-    const response = await api.get('/api/v1/chat/');
+    const response = await api.get('/chat/');
     return response.data;
   },
-  
+
   sendMessage: async (message: string) => {
-    const response = await api.post('/api/v1/chat/', { message });
+    const response = await api.post('/chat/', { message });
     return response.data;
   },
 };
@@ -63,20 +63,20 @@ export const chatApi = {
 // Appointments API
 export const appointmentsApi = {
   getAll: async () => {
-    const response = await api.get('/api/v1/appointments/');
+    const response = await api.get('/appointments/');
     return response.data;
   },
-  
+
   create: async (data: {
     doctor_name: string;
     clinic_name: string;
     appointment_date: string;
     notes?: string;
   }) => {
-    const response = await api.post('/api/v1/appointments/', data);
+    const response = await api.post('/appointments/', data);
     return response.data;
   },
-  
+
   update: async (id: number, data: Partial<{
     doctor_name: string;
     clinic_name: string;
@@ -84,12 +84,12 @@ export const appointmentsApi = {
     status: string;
     notes: string;
   }>) => {
-    const response = await api.put(`/api/v1/appointments/${id}`, data);
+    const response = await api.put(`/appointments/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: number) => {
-    const response = await api.delete(`/api/v1/appointments/${id}`);
+    const response = await api.delete(`/appointments/${id}`);
     return response.data;
   },
 };
@@ -97,22 +97,22 @@ export const appointmentsApi = {
 // Health Report API
 export const healthReportApi = {
   getReport: async () => {
-    const response = await api.get('/api/v1/health-report/');
+    const response = await api.get('/health-report/');
     return response.data;
   },
-  
+
   getSummary: async () => {
-    const response = await api.get('/api/v1/health-report/summary');
+    const response = await api.get('/health-report/summary');
     return response.data;
   },
-  
+
   addMetric: async (data: {
     metric_name: string;
     value: number;
     unit: string;
     recorded_at: string;
   }) => {
-    const response = await api.post('/api/v1/health-report/', data);
+    const response = await api.post('/health-report/', data);
     return response.data;
   },
 };
