@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 
 from app.db.database import get_db
 from app.models.user import User
 from app.models.chat import ChatMessage
-from app.models.appointment import Appointment
+from app.models.appointment import Appointment, AppointmentStatus
 from app.api.routes.auth import get_current_user, get_current_admin
 from app.schemas.user import UserResponse, UserUpdate
 from app.schemas.admin import (
@@ -36,7 +36,7 @@ async def get_dashboard_stats(
         
         # Chat stats
         total_chats = db.query(ChatMessage).count()
-        today = datetime.utcnow().date()
+        today = datetime.now(timezone.utc).date()
         today_chats = db.query(ChatMessage).filter(
             ChatMessage.created_at >= today
         ).count()
@@ -44,7 +44,7 @@ async def get_dashboard_stats(
         # Appointment stats
         total_appointments = db.query(Appointment).count()
         pending_appointments = db.query(Appointment).filter(
-            Appointment.status == "pending"
+            Appointment.status == AppointmentStatus.PENDING
         ).count()
         
         return {

@@ -18,7 +18,7 @@ health_ai = HealthAIService()
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(get_db)]):
-    from jose import JWTError
+    from jwt import PyJWTError
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
@@ -31,7 +31,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotate
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-    except JWTError:
+    except PyJWTError:
         raise credentials_exception
     user = db.query(User).filter(User.username == username).first()
     if user is None:
@@ -59,7 +59,8 @@ async def send_chat(
         user_message = ChatMessage(
             user_id=current_user.id,
             message=message.message,
-            is_user=1
+            is_user=1,
+            language=message.language or "en"
         )
         db.add(user_message)
         db.commit()
@@ -69,8 +70,9 @@ async def send_chat(
         try:
             ai_result = await health_ai.process_health_query(
                 message=message.message,
-                phone_number=current_user.username,  # Using username as identifier
-                channel="app"
+                phone_number=current_user.username,
+                channel="app",
+                language=message.language
             )
             ai_response = ai_result.get("message", "I'm sorry, I couldn't process your query.")
         except Exception as ai_error:
@@ -82,14 +84,19 @@ async def send_chat(
             user_id=current_user.id,
             message=ai_response,
             is_user=0,
-            response=ai_response
+            response=ai_response,
+            language=message.language or "en"
         )
         db.add(bot_message)
         db.commit()
         db.refresh(bot_message)
         
         return bot_message
+        
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         logger.error(f"Chat processing error: {str(e)}")
         db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to process message")
+        raise HTTPException(status_code=500, detail=f"Failed to process message: {str(e)}")

@@ -6,7 +6,7 @@ from typing import Annotated
 from app.db.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, Token
-from app.core.security import verify_password, get_password_hash, create_access_token
+from app.core.security import verify_password, get_password_hash, create_access_token, ALGORITHM
 
 router = APIRouter()
 
@@ -68,7 +68,8 @@ async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)]
 ):
-    from jose import JWTError, jwt
+    import jwt
+    from jwt import PyJWTError
     from app.core.config import settings
     
     credentials_exception = HTTPException(
@@ -77,11 +78,11 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-    except JWTError:
+    except PyJWTError:
         raise credentials_exception
     
     user = get_user_by_username(db, username)

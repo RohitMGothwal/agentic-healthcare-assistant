@@ -148,13 +148,14 @@ class HealthDatabaseService:
         """Get nearby health centers using government health facility database"""
         try:
             # Mock health centers - integrate with real government API
+            # Contact numbers are examples - configure via environment in production
             return [
                 {
                     "name": "Primary Health Center",
                     "type": "PHC",
                     "distance": "2.5 km",
                     "services": ["OPD", "Vaccination", "Maternity"],
-                    "contact": "+91-XXXXXXXXXX",
+                    "contact": "+91-11-23978046",
                     "timing": "9 AM - 5 PM"
                 },
                 {
@@ -166,7 +167,7 @@ class HealthDatabaseService:
                     "timing": "24 hours"
                 }
             ]
-            
+
         except Exception as e:
             logger.error(f"Health centers error: {str(e)}")
             return []

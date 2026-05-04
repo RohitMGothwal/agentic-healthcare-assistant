@@ -34,6 +34,15 @@ health_db = HealthDatabaseService()
 whatsapp_service = WhatsAppService()
 sms_service = SMSService()
 
+
+def send_bulk_alerts(phone_numbers: list, message: str):
+    """Send bulk alerts to multiple phone numbers."""
+    for phone in phone_numbers:
+        try:
+            sms_service.send_sms(phone, message)
+        except Exception as e:
+            logger.error(f"Failed to send alert to {phone}: {e}")
+
 @router.post("/alerts/create")
 async def create_outbreak_alert(
     alert: OutbreakAlert,

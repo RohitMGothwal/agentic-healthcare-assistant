@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApi } from '../api/client';
 
-type User = { username: string; email?: string };
+type User = { username: string; email?: string; is_admin?: boolean };
 
 type AuthContextType = {
   user: User | null;
@@ -12,6 +12,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  setError: (error: string | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,13 +23,13 @@ const USER_KEY = 'auth_user';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [errorState, setErrorState] = useState<string | null>(null);
 
   // Load stored auth on mount
   useEffect(() => {
     const loadAuth = async () => {
       try {
-        const storedUser = await SecureStore.getItemAsync(USER_KEY);
+        const storedUser = await AsyncStorage.getItem(USER_KEY);
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
@@ -42,40 +43,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
-    setError(null);
+    setErrorState(null);
     try {
       const response = await authApi.login(username, password);
-      await SecureStore.setItemAsync(TOKEN_KEY, response.access_token);
+      await AsyncStorage.setItem(TOKEN_KEY, response.access_token);
       const userData: User = { username };
-      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(userData));
+      await AsyncStorage.setItem(USER_KEY, JSON.stringify(userData));
       setUser(userData);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed');
+      setErrorState(err.response?.data?.detail || 'Login failed');
       throw err;
     }
   }, []);
 
   const register = useCallback(async (username: string, password: string, email?: string) => {
-    setError(null);
+    setErrorState(null);
     try {
       await authApi.register(username, password, email);
       // Auto-login after registration
       await login(username, password);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed');
+      setErrorState(err.response?.data?.detail || 'Registration failed');
       throw err;
     }
   }, [login]);
 
   const logout = useCallback(async () => {
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
-    await SecureStore.deleteItemAsync(USER_KEY);
+    await AsyncStorage.removeItem(TOKEN_KEY);
+    await AsyncStorage.removeItem(USER_KEY);
     setUser(null);
   }, []);
 
+  const setError = useCallback((newError: string | null) => {
+    setErrorState(newError);
+  }, []);
+
   const value = useMemo(
-    () => ({ user, login, register, logout, isAuthenticated: !!user, isLoading, error }),
-    [user, login, register, logout, isLoading, error],
+    () => ({ user, login, register, logout, isAuthenticated: !!user, isLoading, error: errorState, setError }),
+    [user, login, register, logout, isLoading, errorState, setError],
   );
 
   return React.createElement(AuthContext.Provider, { value }, children);

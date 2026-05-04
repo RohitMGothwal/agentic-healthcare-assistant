@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Annotated, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.db.database import get_db
 from app.models.health_metric import HealthMetric
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(get_db)]):
-    from jose import JWTError
+    from jwt import PyJWTError
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
@@ -27,7 +27,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotate
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-    except JWTError:
+    except PyJWTError:
         raise credentials_exception
     user = db.query(User).filter(User.username == username).first()
     if user is None:
@@ -41,7 +41,7 @@ async def get_health_report(
     current_user: Annotated[User, Depends(get_current_user)]
 ):
     # Get metrics from last 30 days
-    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
     metrics = db.query(HealthMetric).filter(
         HealthMetric.user_id == current_user.id,
         HealthMetric.recorded_at >= thirty_days_ago

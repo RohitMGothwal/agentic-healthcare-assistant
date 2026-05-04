@@ -9,8 +9,9 @@ import {
   ActivityIndicator,
   TextInput,
   Modal,
+  ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../components/Icon';
 import { useTheme } from '../hooks/useTheme';
 import { adminApi } from '../api/client';
 

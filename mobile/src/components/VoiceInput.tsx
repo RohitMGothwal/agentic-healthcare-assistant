@@ -1,7 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View, ActivityIndicator, Alert } from 'react-native';
-import { Audio } from 'expo-av';
-import * as Speech from 'expo-speech';
+
+// Try to import Expo modules, fallback to null if not available
+let Audio: any = null;
+let Speech: any = null;
+
+try {
+  Audio = require('expo-av').Audio;
+} catch (e) {
+  console.warn('expo-av not available');
+}
+
+try {
+  Speech = require('expo-speech');
+} catch (e) {
+  console.warn('expo-speech not available');
+}
 
 interface VoiceInputProps {
   onResult: (text: string) => void;
@@ -12,9 +26,10 @@ export default function VoiceInput({ onResult, isListening = false }: VoiceInput
   const [recording, setRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isAvailable, setIsAvailable] = useState(!!Audio);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (recording) {
       interval = setInterval(() => {
         setRecordingDuration((prev) => prev + 1);
@@ -26,6 +41,7 @@ export default function VoiceInput({ onResult, isListening = false }: VoiceInput
   }, [recording]);
 
   const requestAudioPermission = async () => {
+    if (!Audio) return false;
     try {
       const { status } = await Audio.requestPermissionsAsync();
       return status === 'granted';
@@ -36,6 +52,15 @@ export default function VoiceInput({ onResult, isListening = false }: VoiceInput
   };
 
   const startRecording = async () => {
+    if (!Audio) {
+      Alert.alert(
+        'Not Available',
+        'Voice input is not available in this build.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     const hasPermission = await requestAudioPermission();
     if (!hasPermission) {
       Alert.alert(

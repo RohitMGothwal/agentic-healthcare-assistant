@@ -1,9 +1,29 @@
 import axios from 'axios';
-import Constants from 'expo-constants';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
-const manifest = (Constants.expoConfig || Constants.manifest) as any;
-const baseURL = manifest?.extra?.apiBaseUrl || 'http://localhost:8000';
+// For iOS simulator, localhost/127.0.0.1 points to the simulator itself
+// We need to use the Mac's actual IP address for the simulator to reach the backend
+// Common options:
+// - http://localhost:8000 (works for web/Android emulator)
+// - http://10.0.2.2:8000 (Android emulator only)
+// - http://<YOUR_MAC_IP>:8000 (iOS simulator & physical devices)
+// 
+// For iOS Simulator, use your Mac's IP address (find it with: ifconfig | grep inet)
+// Example: http://192.168.1.100:8000
+const DEV_API_URL = 'http://172.28.9.76:8000/api/v1'; // Your Mac's IP address with API prefix
+
+const getBaseURL = () => {
+  const isDev = __DEV__;
+  
+  if (isDev) {
+    return DEV_API_URL;
+  }
+  
+  return 'https://agentic-healthcare-assistant.onrender.com/api/v1';
+};
+
+const baseURL = getBaseURL();
 
 export const api = axios.create({
   baseURL,
@@ -15,12 +35,25 @@ export const api = axios.create({
 
 // Add auth token to requests
 api.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync('auth_token');
+  const token = await AsyncStorage.getItem('auth_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+// Handle 401 errors globally
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid - clear it
+      await AsyncStorage.removeItem('auth_token');
+      console.log('Session expired. Please log in again.');
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Auth API
 export const authApi = {
@@ -54,8 +87,8 @@ export const chatApi = {
     return response.data;
   },
 
-  sendMessage: async (message: string) => {
-    const response = await api.post('/chat/', { message });
+  sendMessage: async (message: string, language?: string) => {
+    const response = await api.post('/chat/', { message, language });
     return response.data;
   },
 };

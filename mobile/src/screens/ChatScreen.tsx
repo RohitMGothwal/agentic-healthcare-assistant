@@ -14,10 +14,11 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../components/Icon';
 import ChatBubble from '../components/ChatBubble';
 import VoiceInput from '../components/VoiceInput';
 import { useTheme } from '../hooks/useTheme';
+import { useLanguage } from '../hooks/useLanguage';
 import { chatApi } from '../api/client';
 
 interface ChatMessage {
@@ -35,32 +36,45 @@ interface Specialist {
   description: string;
 }
 
-const SPECIALISTS: Specialist[] = [
-  { id: 'general', name: 'General Physician', icon: 'medical', description: 'Primary healthcare consultation' },
-  { id: 'cardiologist', name: 'Cardiologist', icon: 'heart', description: 'Heart & cardiovascular issues' },
-  { id: 'dermatologist', name: 'Dermatologist', icon: 'body', description: 'Skin, hair & nail conditions' },
-  { id: 'neurologist', name: 'Neurologist', icon: 'brain', description: 'Brain & nervous system disorders' },
-  { id: 'pediatrician', name: 'Pediatrician', icon: 'happy', description: 'Child & adolescent healthcare' },
-  { id: 'gynecologist', name: 'Gynecologist', icon: 'woman', description: 'Women\'s reproductive health' },
-  { id: 'orthopedic', name: 'Orthopedic Surgeon', icon: 'fitness', description: 'Bones, joints & muscles' },
-  { id: 'psychiatrist', name: 'Psychiatrist', icon: 'happy-outline', description: 'Mental health & disorders' },
-  { id: 'dentist', name: 'Dentist', icon: 'sunny', description: 'Dental & oral health' },
-  { id: 'ophthalmologist', name: 'Ophthalmologist', icon: 'eye', description: 'Eye care & vision' },
-  { id: 'ent', name: 'ENT Specialist', icon: 'ear', description: 'Ear, nose & throat conditions' },
-  { id: 'pulmonologist', name: 'Pulmonologist', icon: 'cloud', description: 'Lung & respiratory issues' },
-  { id: 'gastroenterologist', name: 'Gastroenterologist', icon: 'restaurant', description: 'Digestive system disorders' },
-  { id: 'endocrinologist', name: 'Endocrinologist', icon: 'water', description: 'Hormone & metabolic disorders' },
-  { id: 'oncologist', name: 'Oncologist', icon: 'ribbon', description: 'Cancer diagnosis & treatment' },
-  { id: 'urologist', name: 'Urologist', icon: 'man', description: 'Urinary & male reproductive system' },
-  { id: 'nephrologist', name: 'Nephrologist', icon: 'water-outline', description: 'Kidney diseases & disorders' },
-  { id: 'rheumatologist', name: 'Rheumatologist', icon: 'hand-left', description: 'Arthritis & autoimmune diseases' },
-  { id: 'allergist', name: 'Allergist & Immunologist', icon: 'leaf', description: 'Allergies & immune system' },
-  { id: 'emergency', name: 'Emergency Medicine', icon: 'alert-circle', description: 'Urgent & emergency care' },
+// Specialist data with translation keys
+const SPECIALISTS_DATA = [
+  { id: 'general', nameKey: 'specialist_general', icon: 'medical', descKey: 'desc_general' },
+  { id: 'cardiologist', nameKey: 'specialist_cardiologist', icon: 'heart', descKey: 'desc_cardiologist' },
+  { id: 'dermatologist', nameKey: 'specialist_dermatologist', icon: 'body', descKey: 'desc_dermatologist' },
+  { id: 'neurologist', nameKey: 'specialist_neurologist', icon: 'brain', descKey: 'desc_neurologist' },
+  { id: 'pediatrician', nameKey: 'specialist_pediatrician', icon: 'happy', descKey: 'desc_pediatrician' },
+  { id: 'gynecologist', nameKey: 'specialist_gynecologist', icon: 'woman', descKey: 'desc_gynecologist' },
+  { id: 'orthopedic', nameKey: 'specialist_orthopedic', icon: 'fitness', descKey: 'desc_orthopedic' },
+  { id: 'psychiatrist', nameKey: 'specialist_psychiatrist', icon: 'happy-outline', descKey: 'desc_psychiatrist' },
+  { id: 'dentist', nameKey: 'specialist_dentist', icon: 'sunny', descKey: 'desc_dentist' },
+  { id: 'ophthalmologist', nameKey: 'specialist_ophthalmologist', icon: 'eye', descKey: 'desc_ophthalmologist' },
+  { id: 'ent', nameKey: 'specialist_ent', icon: 'ear', descKey: 'desc_ent' },
+  { id: 'pulmonologist', nameKey: 'specialist_pulmonologist', icon: 'cloud', descKey: 'desc_pulmonologist' },
+  { id: 'gastroenterologist', nameKey: 'specialist_gastroenterologist', icon: 'restaurant', descKey: 'desc_gastroenterologist' },
+  { id: 'endocrinologist', nameKey: 'specialist_endocrinologist', icon: 'water', descKey: 'desc_endocrinologist' },
+  { id: 'oncologist', nameKey: 'specialist_oncologist', icon: 'ribbon', descKey: 'desc_oncologist' },
+  { id: 'urologist', nameKey: 'specialist_urologist', icon: 'man', descKey: 'desc_urologist' },
+  { id: 'nephrologist', nameKey: 'specialist_nephrologist', icon: 'water-outline', descKey: 'desc_nephrologist' },
+  { id: 'rheumatologist', nameKey: 'specialist_rheumatologist', icon: 'hand-left', descKey: 'desc_rheumatologist' },
+  { id: 'allergist', nameKey: 'specialist_allergist', icon: 'leaf', descKey: 'desc_allergist' },
+  { id: 'emergency', nameKey: 'specialist_emergency', icon: 'alert-circle', descKey: 'desc_emergency' },
 ];
 
+// Generate specialists with translations
+const useSpecialists = () => {
+  const { t } = useLanguage();
+  return SPECIALISTS_DATA.map(s => ({
+    id: s.id,
+    name: t(s.nameKey),
+    icon: s.icon,
+    description: t(s.descKey),
+  }));
+};
+
 export default function ChatScreen() {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const { colors, isDark } = useTheme();
+  const { t, language } = useLanguage();
+  const SPECIALISTS = useSpecialists();
   
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState<ChatMessage[]>([]);
@@ -69,30 +83,58 @@ export default function ChatScreen() {
   const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist>(SPECIALISTS[0]);
   const [showSpecialistModal, setShowSpecialistModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const chatHistoryRef = useRef<ChatMessage[]>([]);
 
-  // Load chat history on mount
+  // Generate welcome message based on current language
+  const generateWelcomeMessage = useCallback((): ChatMessage => ({
+    id: 0,
+    text: `${t('chatWelcome')}\n\n${t('chatCapabilities')}:\n• ${t('chatFeature1')}\n• ${t('chatFeature2')}\n• ${t('chatFeature3')}\n• ${t('chatFeature4')}\n• ${t('chatFeature5')}\n\n${t('chatPrompt')}`,
+    user: false,
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  }), [t]);
+
+  // Load chat history on mount - only once
   useEffect(() => {
-    loadChatHistory();
-  }, []);
+    const initChat = async () => {
+      try {
+        setIsLoadingHistory(true);
+        const history = await chatApi.getHistory();
+        const formattedHistory = history.map((msg: any) => ({
+          id: msg.id,
+          text: msg.message,
+          user: msg.is_user === 1,
+          created_at: msg.created_at,
+          timestamp: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }));
+        // Store history in a ref to use with welcome message
+        chatHistoryRef.current = formattedHistory;
+        // Set initial chat with welcome message
+        setChat([generateWelcomeMessage(), ...formattedHistory]);
+      } catch (err) {
+        console.error('Failed to load chat history:', err);
+        setChat([generateWelcomeMessage()]);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+    initChat();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
-  const loadChatHistory = async () => {
-    try {
-      setIsLoadingHistory(true);
-      const history = await chatApi.getHistory();
-      const formattedHistory = history.map((msg: any) => ({
-        id: msg.id,
-        text: msg.message,
-        user: msg.is_user === 1,
-        created_at: msg.created_at,
-        timestamp: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      }));
-      setChat(formattedHistory);
-    } catch (err) {
-      console.error('Failed to load chat history:', err);
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  };
+  // Update welcome message when language changes
+  useEffect(() => {
+    setChat((currentChat) => {
+      // If chat is empty, just add welcome message
+      if (currentChat.length === 0) {
+        return [generateWelcomeMessage()];
+      }
+      // If first message is welcome message (id: 0), update it
+      if (currentChat[0].id === 0) {
+        return [generateWelcomeMessage(), ...currentChat.slice(1)];
+      }
+      return currentChat;
+    });
+  }, [language, generateWelcomeMessage]);
 
   const sendMessage = useCallback(async () => {
     const trimmed = message.trim();
@@ -111,7 +153,7 @@ export default function ChatScreen() {
     setIsLoading(true);
 
     try {
-      const response = await chatApi.sendMessage(trimmed);
+      const response = await chatApi.sendMessage(trimmed, language);
       const botTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
       const botMessage: ChatMessage = {
@@ -127,7 +169,7 @@ export default function ChatScreen() {
       setChat((current) => [
         ...current,
         { 
-          text: 'Sorry, I encountered an error. Please try again or contact support if the issue persists.',
+          text: t('serverError'),
           user: false,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
@@ -135,7 +177,7 @@ export default function ChatScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [message, isLoading]);
+  }, [message, isLoading, t]);
 
   const handleVoiceResult = (text: string) => {
     setMessage(text);
@@ -154,7 +196,7 @@ export default function ChatScreen() {
         if (supported) {
           Linking.openURL(url);
         } else {
-          Alert.alert('WhatsApp not installed', 'Please install WhatsApp to use this feature');
+          Alert.alert(t('error'), t('whatsappNotInstalled'));
         }
       })
       .catch((err) => console.error('Error opening WhatsApp:', err));
@@ -173,11 +215,11 @@ export default function ChatScreen() {
 
   if (isLoadingHistory) {
     return (
-      <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3b82f6" />
-          <Text style={[styles.loadingText, isDark && styles.textLight]}>
-            Loading your health assistant...
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+            {t('loading')}...
           </Text>
         </View>
       </SafeAreaView>
@@ -185,103 +227,171 @@ export default function ChatScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
-      {/* Header */}
-      <View style={[styles.header, isDark && styles.headerDark]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Header with Enhanced Specialist Profile */}
+      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <View style={styles.headerLeft}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/40/3b82f6/ffffff?text=AI' }}
-            style={styles.avatar}
-          />
+          <View style={[styles.specialistAvatarContainer, { backgroundColor: colors.primary + '20' }]}>
+            <Ionicons name={selectedSpecialist.icon as any} size={28} color={colors.primary} />
+          </View>
           <View style={styles.headerInfo}>
-            <Text style={[styles.headerTitle, isDark && styles.textLight]}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
               {selectedSpecialist.name}
             </Text>
-            <View style={styles.statusContainer}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>Online</Text>
+            <View style={styles.specialistMetaContainer}>
+              <View style={styles.statusContainer}>
+                <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
+                <Text style={[styles.statusText, { color: colors.success }]}>{t('online')}</Text>
+              </View>
+              <Text style={[styles.specialistExperience, { color: colors.textSecondary }]}>
+                • 15+ years exp
+              </Text>
             </View>
+            <Text style={[styles.specialistDescription, { color: colors.textSecondary }]} numberOfLines={1}>
+              {selectedSpecialist.description}
+            </Text>
           </View>
         </View>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleCall}>
-            <Ionicons name="call" size={22} color="#3b82f6" />
+          <TouchableOpacity style={[styles.iconButton, { backgroundColor: colors.background }]} onPress={handleCall}>
+            <Ionicons name="call" size={22} color={colors.primary} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={handleWhatsApp}>
-            <Ionicons name="logo-whatsapp" size={22} color="#10b981" />
+          <TouchableOpacity style={[styles.iconButton, { backgroundColor: colors.background }]} onPress={handleWhatsApp}>
+            <Ionicons name="logo-whatsapp" size={22} color={colors.success} />
           </TouchableOpacity>
           <TouchableOpacity 
-            style={styles.specialistButton}
+            style={[styles.changeSpecialistButton, { backgroundColor: colors.primary }]}
             onPress={() => setShowSpecialistModal(true)}
-            accessibilityLabel={`Current specialist: ${selectedSpecialist.name}`}
           >
-            <Ionicons name={selectedSpecialist.icon as any} size={18} color="#fff" />
+            <Ionicons name="swap-horizontal" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Specialist Selector Modal */}
+      {/* Enhanced Specialist Selector Modal */}
       {showSpecialistModal && (
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, isDark && styles.modalContentDark]}>
-            <Text style={[styles.modalTitle, isDark && styles.textLight]}>
-              Choose Specialist
-            </Text>
-            <Text style={[styles.modalSubtitle, isDark && styles.textMuted]}>
-              {SPECIALISTS.length} specialists available
-            </Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+            <View style={styles.modalHeader}>
+              <View>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  {t('chooseSpecialist')}
+                </Text>
+                <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
+                  {SPECIALISTS.length} {t('specialistsAvailable')} • Select for consultation
+                </Text>
+              </View>
+              <TouchableOpacity 
+                style={[styles.closeIconButton, { backgroundColor: colors.background }]} 
+                onPress={() => setShowSpecialistModal(false)}
+              >
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            
             <ScrollView style={styles.specialistList} showsVerticalScrollIndicator={true}>
               {SPECIALISTS.map((specialist) => (
                 <TouchableOpacity
                   key={specialist.id}
                   style={[
-                    styles.specialistCard,
-                    selectedSpecialist.id === specialist.id && styles.selectedSpecialist,
-                    isDark && styles.specialistCardDark,
+                    styles.specialistProfileCard,
+                    selectedSpecialist.id === specialist.id && { 
+                      backgroundColor: colors.primary + '10', 
+                      borderColor: colors.primary,
+                      borderWidth: 2 
+                    },
+                    { backgroundColor: colors.background, borderColor: colors.border }
                   ]}
                   onPress={() => {
                     setSelectedSpecialist(specialist);
                     setShowSpecialistModal(false);
                   }}
                 >
-                  <View style={[
-                    styles.specialistIconContainer,
-                    selectedSpecialist.id === specialist.id && styles.selectedSpecialistIcon,
-                  ]}>
-                    <Ionicons 
-                      name={specialist.icon as any} 
-                      size={22} 
-                      color={selectedSpecialist.id === specialist.id ? '#3b82f6' : '#fff'} 
-                    />
-                  </View>
-                  <View style={styles.specialistInfo}>
-                    <Text style={[
-                      styles.specialistName,
-                      selectedSpecialist.id === specialist.id && styles.selectedText,
-                      isDark && styles.textLight,
+                  {/* Avatar Section */}
+                  <View style={styles.specialistProfileHeader}>
+                    <View style={[
+                      styles.specialistAvatarLarge,
+                      { backgroundColor: colors.primary + '20' },
+                      selectedSpecialist.id === specialist.id && { backgroundColor: colors.primary + '30' }
                     ]}>
-                      {specialist.name}
-                    </Text>
-                    <Text style={[
-                      styles.specialistDesc,
-                      selectedSpecialist.id === specialist.id && styles.selectedText,
-                      isDark && styles.textMuted,
+                      <Ionicons 
+                        name={specialist.icon as any} 
+                        size={32} 
+                        color={colors.primary} 
+                      />
+                    </View>
+                    
+                    <View style={styles.specialistProfileInfo}>
+                      <Text style={[
+                        styles.specialistProfileName,
+                        { color: colors.text },
+                        selectedSpecialist.id === specialist.id && { color: colors.primary }
+                      ]}>
+                        {specialist.name}
+                      </Text>
+                      
+                      <View style={styles.specialistTags}>
+                        <View style={[styles.specialistTag, { backgroundColor: colors.success + '20' }]}>
+                          <Ionicons name="star" size={12} color={colors.success} />
+                          <Text style={[styles.specialistTagText, { color: colors.success }]}>4.9</Text>
+                        </View>
+                        <View style={[styles.specialistTag, { backgroundColor: colors.primary + '20' }]}>
+                          <Ionicons name="time" size={12} color={colors.primary} />
+                          <Text style={[styles.specialistTagText, { color: colors.primary }]}>15+ yrs</Text>
+                        </View>
+                      </View>
+                      
+                      <Text style={[styles.specialistProfileDesc, { color: colors.textSecondary }]} numberOfLines={2}>
+                        {specialist.description}
+                      </Text>
+                    </View>
+                    
+                    {/* Selection Indicator */}
+                    <View style={[
+                      styles.selectionIndicator,
+                      { borderColor: selectedSpecialist.id === specialist.id ? colors.primary : colors.border }
                     ]}>
-                      {specialist.description}
-                    </Text>
+                      {selectedSpecialist.id === specialist.id && (
+                        <View style={[styles.selectionDot, { backgroundColor: colors.primary }]} />
+                      )}
+                    </View>
                   </View>
-                  {selectedSpecialist.id === specialist.id && (
-                    <Ionicons name="checkmark-circle" size={24} color="#3b82f6" />
-                  )}
+                  
+                  {/* Availability & Action Section */}
+                  <View style={styles.specialistProfileFooter}>
+                    <View style={styles.availabilityContainer}>
+                      <View style={[styles.availabilityDot, { backgroundColor: colors.success }]} />
+                      <Text style={[styles.availabilityText, { color: colors.success }]}>
+                        Available Now
+                      </Text>
+                      <Text style={[styles.responseTime, { color: colors.textSecondary }]}>
+                        • Usually responds in 2 min
+                      </Text>
+                    </View>
+                    
+                    <TouchableOpacity 
+                      style={[
+                        styles.consultButton,
+                        { backgroundColor: selectedSpecialist.id === specialist.id ? colors.primary : colors.primary + '80' }
+                      ]}
+                      onPress={() => {
+                        setSelectedSpecialist(specialist);
+                        setShowSpecialistModal(false);
+                      }}
+                    >
+                      <Text style={styles.consultButtonText}>
+                        {selectedSpecialist.id === specialist.id ? 'Selected' : 'Consult'}
+                      </Text>
+                      <Ionicons 
+                        name={selectedSpecialist.id === specialist.id ? "checkmark" : "arrow-forward"} 
+                        size={16} 
+                        color="#fff" 
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowSpecialistModal(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -299,29 +409,45 @@ export default function ChatScreen() {
         >
           {chat.length === 0 ? (
             <View style={styles.welcomeContainer}>
-              <Ionicons name="medical" size={64} color="#3b82f6" />
-              <Text style={[styles.welcomeTitle, isDark && styles.textLight]}>
-                Welcome to Agentic Health
+              <Ionicons name="medical" size={64} color={colors.primary} />
+              <Text style={[styles.welcomeTitle, { color: colors.text }]}>
+                {t('welcome')}
               </Text>
-              <Text style={[styles.welcomeText, isDark && styles.textMuted]}>
-                I'm your AI healthcare assistant. I can help you with:
+              <Text style={[styles.welcomeText, { color: colors.textSecondary }]}>
+                {t('chatWelcome')}
               </Text>
               <View style={styles.featureList}>
-                {['Symptom checking', 'Health education', 'Vaccination info', 'Emergency guidance'].map((feature, i) => (
+                {[t('chatFeature1'), t('chatFeature2'), t('chatFeature3'), t('chatFeature4')].map((feature, i) => (
                   <View key={i} style={styles.featureItem}>
-                    <Ionicons name="checkmark-circle" size={16} color="#10b981" />
-                    <Text style={[styles.featureText, isDark && styles.textLight]}>{feature}</Text>
+                    <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+                    <Text style={[styles.featureText, { color: colors.text }]}>{feature}</Text>
                   </View>
                 ))}
               </View>
-              <Text style={[styles.disclaimer, isDark && styles.textMuted]}>
-                Note: This is not a substitute for professional medical advice.
+              <Text style={[styles.disclaimer, { color: colors.textSecondary }]}>
+                {t('medicalDisclaimer')}
               </Text>
+            </View>
+          ) : chat.length === 1 && chat[0].id === 0 ? (
+            // Only show welcome message from AI, no user messages yet
+            <View style={styles.welcomeContainer}>
+              <Ionicons name="medical" size={48} color={colors.primary} />
+              <Text style={[styles.welcomeText, { color: colors.textSecondary, marginTop: 16 }]}>
+                {t('startConversation')}
+              </Text>
+              <View style={styles.featureList}>
+                {[t('typeFever'), t('typeHeadache'), t('typeEmergency')].map((feature, i) => (
+                  <View key={i} style={styles.featureItem}>
+                    <Ionicons name="chatbubble" size={16} color={colors.primary} />
+                    <Text style={[styles.featureText, { color: colors.text }]}>{feature}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
           ) : (
             chat.map((item, index) => (
               <ChatBubble
-                key={item.id || index}
+                key={item.id ? `msg-${item.id}` : `temp-${index}-${Date.now()}`}
                 message={item.text}
                 isUser={item.user}
                 timestamp={item.timestamp}
@@ -330,27 +456,27 @@ export default function ChatScreen() {
           )}
           {isLoading && (
             <View style={styles.typingIndicator}>
-              <ActivityIndicator size="small" color="#3b82f6" />
-              <Text style={[styles.typingText, isDark && styles.textMuted]}>
-                AI is typing...
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={[styles.typingText, { color: colors.textSecondary }]}>
+                {t('aiTyping')}
               </Text>
             </View>
           )}
         </ScrollView>
 
         {/* Quick Actions */}
-        <View style={[styles.quickActions, isDark && styles.quickActionsDark]}>
+        <View style={[styles.quickActions, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
           <TouchableOpacity style={styles.quickActionBtn} onPress={handleSMS}>
-            <Ionicons name="chatbubble" size={20} color="#3b82f6" />
-            <Text style={styles.quickActionText}>SMS</Text>
+            <Ionicons name="chatbubble" size={20} color={colors.primary} />
+            <Text style={[styles.quickActionText, { color: colors.textSecondary }]}>{t('sms')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionBtn} onPress={handleCall}>
-            <Ionicons name="call" size={20} color="#ef4444" />
-            <Text style={styles.quickActionText}>Emergency</Text>
+            <Ionicons name="call" size={20} color={colors.error} />
+            <Text style={[styles.quickActionText, { color: colors.textSecondary }]}>{t('emergency')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionBtn} onPress={handleWhatsApp}>
-            <Ionicons name="logo-whatsapp" size={20} color="#10b981" />
-            <Text style={styles.quickActionText}>WhatsApp</Text>
+            <Ionicons name="logo-whatsapp" size={20} color={colors.success} />
+            <Text style={[styles.quickActionText, { color: colors.textSecondary }]}>{t('whatsapp')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -358,11 +484,11 @@ export default function ChatScreen() {
         <VoiceInput onResult={handleVoiceResult} />
 
         {/* Input Area */}
-        <View style={[styles.inputContainer, isDark && styles.inputContainerDark]}>
+        <View style={[styles.inputContainer, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
           <TextInput
-            style={[styles.textInput, isDark && styles.textInputDark]}
-            placeholder="Type your health question..."
-            placeholderTextColor={isDark ? '#6b7280' : '#9ca3af'}
+            style={[styles.textInput, { backgroundColor: colors.background, color: colors.text }]}
+            placeholder={t('typeMessage')}
+            placeholderTextColor={colors.textSecondary}
             value={message}
             onChangeText={setMessage}
             onSubmitEditing={sendMessage}
@@ -373,7 +499,8 @@ export default function ChatScreen() {
           <TouchableOpacity
             style={[
               styles.sendButton,
-              (!message.trim() || isLoading) && styles.sendButtonDisabled,
+              { backgroundColor: colors.primary },
+              (!message.trim() || isLoading) && { backgroundColor: colors.border }
             ]}
             onPress={sendMessage}
             disabled={!message.trim() || isLoading}
@@ -381,7 +508,7 @@ export default function ChatScreen() {
             <Ionicons
               name="send"
               size={20}
-              color={message.trim() && !isLoading ? '#fff' : '#9ca3af'}
+              color={message.trim() && !isLoading ? '#fff' : colors.textSecondary}
             />
           </TouchableOpacity>
         </View>
@@ -393,10 +520,6 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  containerDark: {
-    backgroundColor: '#0a0f1e',
   },
   loadingContainer: {
     flex: 1,
@@ -406,7 +529,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#64748b',
   },
   header: {
     flexDirection: 'row',
@@ -414,18 +536,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 3,
-  },
-  headerDark: {
-    backgroundColor: '#111827',
-    borderBottomColor: '#1f2937',
   },
   headerLeft: {
     flexDirection: 'row',
@@ -435,7 +551,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#3b82f6',
   },
   headerInfo: {
     marginLeft: 12,
@@ -443,7 +558,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1e293b',
   },
   statusContainer: {
     flexDirection: 'row',
@@ -459,7 +573,6 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 13,
-    color: '#10b981',
   },
   headerActions: {
     flexDirection: 'row',
@@ -469,12 +582,31 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#f1f5f9',
   },
-  specialistButton: {
+  changeSpecialistButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#3b82f6',
+  },
+  specialistAvatarContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  specialistMetaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+    gap: 8,
+  },
+  specialistExperience: {
+    fontSize: 12,
+  },
+  specialistDescription: {
+    fontSize: 12,
+    marginTop: 2,
+    maxWidth: 200,
   },
   modalOverlay: {
     position: 'absolute',
@@ -482,98 +614,143 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     zIndex: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 16,
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 20,
     width: '100%',
-    maxHeight: '80%',
+    maxHeight: '85%',
   },
-  modalContentDark: {
-    backgroundColor: '#1f2937',
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     marginBottom: 4,
-    textAlign: 'center',
-    color: '#1e293b',
   },
   modalSubtitle: {
     fontSize: 14,
-    color: '#64748b',
-    textAlign: 'center',
-    marginBottom: 16,
+  },
+  closeIconButton: {
+    padding: 8,
+    borderRadius: 20,
   },
   specialistList: {
-    maxHeight: 500,
+    maxHeight: 520,
   },
-  specialistCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 8,
-    backgroundColor: '#f8fafc',
+  specialistProfileCard: {
+    borderRadius: 16,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    overflow: 'hidden',
   },
-  specialistCardDark: {
-    backgroundColor: '#374151',
-    borderColor: '#4b5563',
+  specialistProfileHeader: {
+    flexDirection: 'row',
+    padding: 16,
+    alignItems: 'flex-start',
   },
-  selectedSpecialist: {
-    backgroundColor: '#dbeafe',
-    borderColor: '#3b82f6',
-  },
-  specialistIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#3b82f6',
+  specialistAvatarLarge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  selectedSpecialistIcon: {
-    backgroundColor: '#fff',
-  },
-  specialistInfo: {
+  specialistProfileInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 14,
+    marginRight: 8,
   },
-  specialistName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
+  specialistProfileName: {
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 6,
   },
-  selectedText: {
-    color: '#fff',
+  specialistTags: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
   },
-  specialistDesc: {
-    fontSize: 13,
-    color: '#64748b',
-    marginTop: 2,
-  },
-  textMuted: {
-    color: '#94a3b8',
-  },
-  closeButton: {
-    marginTop: 16,
-    padding: 14,
-    backgroundColor: '#f1f5f9',
+  specialistTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 12,
+    gap: 4,
+  },
+  specialistTagText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  specialistProfileDesc: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  selectionIndicator: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  closeButtonText: {
-    fontSize: 16,
+  selectionDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  specialistProfileFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  availabilityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  availabilityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  availabilityText: {
+    fontSize: 13,
     fontWeight: '600',
-    color: '#64748b',
+  },
+  responseTime: {
+    fontSize: 12,
+    marginLeft: 6,
+  },
+  consultButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 6,
+  },
+  consultButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   keyboardView: {
     flex: 1,
@@ -594,11 +771,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 20,
     marginBottom: 12,
-    color: '#1e293b',
   },
   welcomeText: {
     fontSize: 16,
-    color: '#64748b',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -614,11 +789,9 @@ const styles = StyleSheet.create({
   featureText: {
     fontSize: 15,
     marginLeft: 10,
-    color: '#374151',
   },
   disclaimer: {
     fontSize: 13,
-    color: '#94a3b8',
     textAlign: 'center',
     marginTop: 30,
     fontStyle: 'italic',
@@ -633,20 +806,13 @@ const styles = StyleSheet.create({
   typingText: {
     marginLeft: 8,
     fontSize: 13,
-    color: '#64748b',
   },
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-  },
-  quickActionsDark: {
-    backgroundColor: '#111827',
-    borderTopColor: '#1f2937',
   },
   quickActionBtn: {
     alignItems: 'center',
@@ -655,41 +821,27 @@ const styles = StyleSheet.create({
   quickActionText: {
     fontSize: 12,
     marginTop: 4,
-    color: '#64748b',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-  },
-  inputContainerDark: {
-    backgroundColor: '#111827',
-    borderTopColor: '#1f2937',
   },
   textInput: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
     borderRadius: 24,
     paddingHorizontal: 20,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#1e293b',
     maxHeight: 100,
-  },
-  textInputDark: {
-    backgroundColor: '#1f2937',
-    color: '#f1f5f9',
   },
   sendButton: {
     marginLeft: 12,
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#3b82f6',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#3b82f6',
@@ -697,12 +849,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
-  },
-  sendButtonDisabled: {
-    backgroundColor: '#e2e8f0',
-    shadowOpacity: 0,
-  },
-  textLight: {
-    color: '#f1f5f9',
   },
 });

@@ -8,7 +8,7 @@ class TranslationService:
     """Translation service for multilingual support"""
     
     def __init__(self):
-        # Supported languages for rural India
+        # Supported languages - all 23 languages
         self.supported_languages = {
             'en': 'English',
             'hi': 'Hindi',
@@ -20,8 +20,19 @@ class TranslationService:
             'gu': 'Gujarati',
             'kn': 'Kannada',
             'ml': 'Malayalam',
-            'pa': 'Punjabi',
-            'or': 'Odia'
+            'or': 'Odia',
+            'zh': 'Chinese',
+            'es': 'Spanish',
+            'tl': 'Tagalog',
+            'ar': 'Arabic',
+            'fr': 'French',
+            'de': 'German',
+            'it': 'Italian',
+            'ja': 'Japanese',
+            'ko': 'Korean',
+            'pt': 'Portuguese',
+            'ru': 'Russian',
+            'tr': 'Turkish'
         }
     
     async def detect_language(self, text: str) -> str:
@@ -39,6 +50,31 @@ class TranslationService:
             bengali_words = ['এবং', 'হয়', 'একটি', 'এর', 'কে']
             if any(word in text for word in bengali_words):
                 return 'bn'
+            
+            # Arabic detection
+            arabic_words = ['ال', 'في', 'من', 'هذا', 'على', 'أن', 'هو']
+            if any(word in text for word in arabic_words):
+                return 'ar'
+            
+            # Chinese detection
+            chinese_chars = ['的', '了', '在', '是', '我', '有', '和', '就']
+            if any(char in text for char in chinese_chars):
+                return 'zh'
+            
+            # Japanese detection
+            japanese_chars = ['の', 'は', 'に', 'を', 'が', 'で', 'す', 'です']
+            if any(char in text for char in japanese_chars):
+                return 'ja'
+            
+            # Korean detection
+            korean_chars = ['은', '는', '이', '가', '을', '를', '의', '에']
+            if any(char in text for char in korean_chars):
+                return 'ko'
+            
+            # Russian detection
+            russian_chars = ['и', 'в', 'не', 'на', 'я', 'быть', 'он', 'с']
+            if any(char in text for char in russian_chars):
+                return 'ru'
             
             # Default to English
             return 'en'

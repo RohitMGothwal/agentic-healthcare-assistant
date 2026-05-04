@@ -1,5 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Ionicons } from '../components/Icon';
+import { View, Text } from 'react-native';
 import DashboardScreen from '../screens/DashboardScreen';
 import ChatScreen from '../screens/ChatScreen';
 import HealthReportScreen from '../screens/HealthReportScreen';
@@ -14,18 +16,104 @@ import AdminAppointmentsScreen from '../screens/AdminAppointmentsScreen';
 import AdminContentScreen from '../screens/AdminContentScreen';
 import AdminSystemScreen from '../screens/AdminSystemScreen';
 import AdminLogsScreen from '../screens/AdminLogsScreen';
+import { useTheme } from '../hooks/useTheme';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function MainTabs() {
+// Custom tab bar icon component with label
+function TabIcon({ icon, label, focused, colors }: { icon: string; label: string; focused: boolean; colors: any }) {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="Chat" component={ChatScreen} />
-      <Tab.Screen name="HealthReport" component={HealthReportScreen} options={{ title: 'Health' }} />
-      <Tab.Screen name="Appointments" component={AppointmentsScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+    <View style={{ alignItems: 'center', justifyContent: 'center', paddingTop: 8 }}>
+      <Ionicons
+        name={icon as any}
+        size={focused ? 26 : 22}
+        color={focused ? colors.primary : colors.textSecondary}
+      />
+      <Text
+        style={{
+          fontSize: 11,
+          marginTop: 2,
+          color: focused ? colors.primary : colors.textSecondary,
+          fontWeight: focused ? '600' : '400',
+        }}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+function MainTabs() {
+  const { colors, isDark } = useTheme();
+
+  return (
+    <Tab.Navigator
+      initialRouteName="Dashboard"
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
+          height: 70,
+          paddingBottom: 10,
+          elevation: 8,
+          shadowColor: isDark ? '#000' : '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+        tabBarShowLabel: false,
+      }}
+    >
+      {/* OPTION C - Mixed Style (Dashboard filled, others outlined) */}
+      <Tab.Screen
+        name="HealthReport"
+        component={HealthReportScreen}
+        options={{
+          title: 'Health',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon={focused ? "heart" : "heart-outline"} label="Health" focused={focused} colors={colors} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon={focused ? "chatbubble" : "chatbubble-outline"} label="Chat" focused={focused} colors={colors} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="grid" label="Dashboard" focused={focused} colors={colors} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Appointments"
+        component={AppointmentsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon={focused ? "calendar" : "calendar-outline"} label="Appointments" focused={focused} colors={colors} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon={focused ? "settings" : "settings-outline"} label="Settings" focused={focused} colors={colors} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }

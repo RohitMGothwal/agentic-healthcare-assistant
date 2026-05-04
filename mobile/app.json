@@ -1,4 +1,6 @@
 {
+  "name": "AgenticHealth",
+  "displayName": "Agentic Health",
   "expo": {
     "name": "Agentic Health",
     "slug": "agentic-health-assistant",
@@ -22,13 +24,7 @@
         }
       ]
     ],
-    "updates": {
-      "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/YOUR_PROJECT_ID"
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.yourcompany.agentichealthassistant",

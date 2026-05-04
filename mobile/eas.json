@@ -3,6 +3,26 @@
     "version": ">= 3.0.0"
   },
   "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "workflow": "managed"
+      },
+      "ios": {
+        "workflow": "managed"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "workflow": "managed",
+        "buildType": "apk"
+      },
+      "ios": {
+        "workflow": "managed"
+      }
+    },
     "production": {
       "android": {
         "workflow": "managed"

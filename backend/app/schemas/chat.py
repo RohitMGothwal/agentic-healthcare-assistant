@@ -8,12 +8,12 @@ class ChatMessageBase(BaseModel):
 
 
 class ChatMessageCreate(ChatMessageBase):
-    pass
+    language: Optional[str] = None
 
 
 class ChatMessageResponse(ChatMessageBase):
     id: int
-    user_id: int
+    user_id: Optional[int]
     is_user: int
     response: Optional[str]
     created_at: datetime

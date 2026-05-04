@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(get_db)]):
-    from jose import JWTError
+    from jwt import PyJWTError
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
@@ -27,7 +27,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotate
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-    except JWTError:
+    except PyJWTError:
         raise credentials_exception
     user = db.query(User).filter(User.username == username).first()
     if user is None:
