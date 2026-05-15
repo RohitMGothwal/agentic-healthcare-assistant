@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
 // 
 // For iOS Simulator, use your Mac's IP address (find it with: ifconfig | grep inet)
 // Example: http://192.168.1.100:8000
-const DEV_API_URL = 'http://172.28.9.76:8000/api/v1'; // Your Mac's IP address with API prefix
+const DEV_API_URL = 'http://172.28.9.126:8000/api/v1'; // Your Mac's IP address with API prefix
 
 const getBaseURL = () => {
   const isDev = __DEV__;
@@ -27,7 +27,7 @@ const baseURL = getBaseURL();
 
 export const api = axios.create({
   baseURL,
-  timeout: 10000,
+  timeout: 15000, // Increased timeout for iOS simulator
   headers: {
     'Content-Type': 'application/json',
   },
@@ -54,6 +54,18 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Health check to warm up connection
+export const healthCheck = async () => {
+  try {
+    const response = await api.get('/health', { timeout: 5000 });
+    console.log('Backend health check:', response.data);
+    return response.data;
+  } catch (error) {
+    console.log('Health check failed:', error);
+    return null;
+  }
+};
 
 // Auth API
 export const authApi = {
@@ -89,6 +101,11 @@ export const chatApi = {
 
   sendMessage: async (message: string, language?: string) => {
     const response = await api.post('/chat/', { message, language });
+    return response.data;
+  },
+
+  analyzeSymptoms: async (symptoms: string) => {
+    const response = await api.post('/chat/analyze', { symptoms });
     return response.data;
   },
 };

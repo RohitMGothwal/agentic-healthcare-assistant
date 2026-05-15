@@ -130,7 +130,7 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <View>
             <ThemedText style={[styles.greeting, { color: colors.textSecondary }]}>{greeting}</ThemedText>
-            <ThemedText style={[styles.userName, { color: colors.text }]}>{user?.username || 'User'} 👋</ThemedText>
+            <ThemedText style={[styles.userName, { color: colors.text }]}>{user?.username || t('guest')} 👋</ThemedText>
           </View>
           <TouchableOpacity style={[styles.profileButton, { backgroundColor: colors.card }]}>
             <Ionicons name="person" size={24} color={colors.primary} />
@@ -205,7 +205,7 @@ export default function DashboardScreen() {
               <View style={[styles.quickActionIcon, { backgroundColor: '#f59e0b' + '20' }]}>
                 <Ionicons name="settings" size={24} color="#f59e0b" />
               </View>
-              <ThemedText style={[styles.quickActionText, { color: colors.text }]}>Settings</ThemedText>
+              <ThemedText style={[styles.quickActionText, { color: colors.text }]}>{t('settings')}</ThemedText>
             </TouchableOpacity>
           </View>
         </View>

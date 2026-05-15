@@ -115,7 +115,7 @@ export default function AppointmentsScreen() {
 
   const handleCreateAppointment = async () => {
     if (!doctorName.trim() || !clinicName.trim() || !date.trim()) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      Alert.alert(t('error'), t('fillRequiredFields'));
       return;
     }
 
@@ -145,9 +145,9 @@ export default function AppointmentsScreen() {
       setNotes('');
       setModalVisible(false);
       
-      Alert.alert('Success', 'Appointment created successfully!');
+      Alert.alert(t('success'), t('appointmentCreatedSuccess'));
     } catch (err) {
-      Alert.alert('Error', 'Failed to create appointment');
+      Alert.alert(t('error'), t('appointmentCreateFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -155,12 +155,12 @@ export default function AppointmentsScreen() {
 
   const handleDeleteAppointment = (id: number) => {
     Alert.alert(
-      'Delete Appointment',
-      'Are you sure you want to delete this appointment?',
+      t('deleteAppointment'),
+      t('confirmDeleteAppointment'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: () => {
             setAppointments(prev => prev.filter(a => a.id !== id));
@@ -172,12 +172,12 @@ export default function AppointmentsScreen() {
 
   const handleCancelAppointment = (id: number) => {
     Alert.alert(
-      'Cancel Appointment',
-      'Are you sure you want to cancel this appointment?',
+      t('cancelAppointment'),
+      t('confirmCancelAppointment'),
       [
-        { text: 'No', style: 'cancel' },
+        { text: t('no'), style: 'cancel' },
         {
-          text: 'Yes, Cancel',
+          text: t('yesCancel'),
           style: 'destructive',
           onPress: () => {
             setAppointments(prev =>
@@ -287,7 +287,7 @@ export default function AppointmentsScreen() {
                 { color: filter === status ? '#fff' : colors.text },
               ]}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {t(status)}
             </ThemedText>
           </TouchableOpacity>
         ))}
@@ -316,7 +316,7 @@ export default function AppointmentsScreen() {
               onPress={() => setModalVisible(true)}
             >
               <ThemedText style={{ color: colors.primary }}>
-                Create Your First Appointment
+                {t('createFirstAppointment')}
               </ThemedText>
             </TouchableOpacity>
           </View>
@@ -354,7 +354,7 @@ export default function AppointmentsScreen() {
                     style={styles.statusIcon}
                   />
                   <ThemedText style={styles.statusText}>
-                    {appointment.status}
+                    {t(appointment.status)}
                   </ThemedText>
                 </View>
               </View>
@@ -395,7 +395,7 @@ export default function AppointmentsScreen() {
                     >
                       <Ionicons name="close-circle-outline" size={16} color="#ef4444" />
                       <ThemedText style={[styles.actionButtonText, { color: '#ef4444' }]}>
-                        Cancel
+                      {t('cancel')}
                       </ThemedText>
                     </TouchableOpacity>
                   </>
@@ -406,7 +406,7 @@ export default function AppointmentsScreen() {
                 >
                   <Ionicons name="trash-outline" size={16} color="#ef4444" />
                   <ThemedText style={[styles.actionButtonText, { color: '#ef4444' }]}>
-                    Delete
+                    {t('delete')}
                   </ThemedText>
                 </TouchableOpacity>
               </View>
@@ -430,7 +430,7 @@ export default function AppointmentsScreen() {
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <ThemedText style={[styles.modalTitle, { color: colors.text }]}>
-                New Appointment
+                {t('newAppointment')}
               </ThemedText>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
@@ -441,13 +441,13 @@ export default function AppointmentsScreen() {
               {/* Doctor Name */}
               <View style={styles.formGroup}>
                 <ThemedText style={[styles.label, { color: colors.text }]}>
-                  Doctor Name *
+                  {t('doctorName')} *
                 </ThemedText>
                 <View style={[styles.inputWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
                   <Ionicons name="medical-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
-                    placeholder="e.g. Dr. Sarah Johnson"
+                    placeholder={t('doctorNamePlaceholder')}
                     placeholderTextColor={colors.textSecondary}
                     value={doctorName}
                     onChangeText={setDoctorName}
@@ -458,13 +458,13 @@ export default function AppointmentsScreen() {
               {/* Clinic Name */}
               <View style={styles.formGroup}>
                 <ThemedText style={[styles.label, { color: colors.text }]}>
-                  Clinic/Hospital Name *
+                  {t('clinicName')} *
                 </ThemedText>
                 <View style={[styles.inputWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
                   <Ionicons name="business-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
-                    placeholder="e.g. City Heart Care Center"
+                    placeholder={t('clinicNamePlaceholder')}
                     placeholderTextColor={colors.textSecondary}
                     value={clinicName}
                     onChangeText={setClinicName}
@@ -476,13 +476,13 @@ export default function AppointmentsScreen() {
               <View style={styles.formRow}>
                 <View style={[styles.formGroup, styles.formGroupHalf]}>
                   <ThemedText style={[styles.label, { color: colors.text }]}>
-                    Date *
+                    {t('date')} *
                   </ThemedText>
                   <View style={[styles.inputWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
                     <Ionicons name="calendar-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
-                      placeholder="YYYY-MM-DD"
+                      placeholder={t('datePlaceholder')}
                       placeholderTextColor={colors.textSecondary}
                       value={date}
                       onChangeText={setDate}
@@ -492,13 +492,13 @@ export default function AppointmentsScreen() {
 
                 <View style={[styles.formGroup, styles.formGroupHalf]}>
                   <ThemedText style={[styles.label, { color: colors.text }]}>
-                    Time
+                    {t('time')}
                   </ThemedText>
                   <View style={[styles.inputWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
                     <Ionicons name="time-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                     <TextInput
                       style={[styles.input, { color: colors.text }]}
-                      placeholder="HH:MM"
+                      placeholder={t('timePlaceholder')}
                       placeholderTextColor={colors.textSecondary}
                       value={time}
                       onChangeText={setTime}
@@ -510,12 +510,12 @@ export default function AppointmentsScreen() {
               {/* Notes */}
               <View style={styles.formGroup}>
                 <ThemedText style={[styles.label, { color: colors.text }]}>
-                  Notes (Optional)
+                  {t('notesOptional')}
                 </ThemedText>
                 <View style={[styles.textAreaWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
                   <TextInput
                     style={[styles.textArea, { color: colors.text }]}
-                    placeholder="Add any additional notes..."
+                    placeholder={t('notesPlaceholder')}
                     placeholderTextColor={colors.textSecondary}
                     value={notes}
                     onChangeText={setNotes}
@@ -536,7 +536,7 @@ export default function AppointmentsScreen() {
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <ThemedText style={styles.submitButtonText}>
-                    Create Appointment
+                    {t('createAppointment')}
                   </ThemedText>
                 )}
               </TouchableOpacity>

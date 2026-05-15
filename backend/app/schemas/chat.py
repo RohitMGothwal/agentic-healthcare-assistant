@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 class ChatMessageBase(BaseModel):
@@ -20,3 +20,20 @@ class ChatMessageResponse(ChatMessageBase):
 
     class Config:
         from_attributes = True
+
+
+class ConditionInfo(BaseModel):
+    condition: str
+    matching_symptoms: List[str]
+    treatment: str
+    urgency: str
+
+
+class SymptomAnalysisRequest(BaseModel):
+    symptoms: str
+
+
+class SymptomAnalysisResponse(BaseModel):
+    conditions: List[ConditionInfo]
+    disclaimer: str
+    urgency: str

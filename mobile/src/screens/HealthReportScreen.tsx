@@ -205,8 +205,8 @@ export default function HealthReportScreen() {
               <ThemedText style={[styles.checkupMonth, { color: colors.primary }]}>MAY</ThemedText>
             </View>
             <View style={styles.checkupInfo}>
-              <ThemedText style={[styles.checkupType, { color: colors.text }]}>General Health Checkup</ThemedText>
-              <ThemedText style={[styles.checkupDoctor, { color: colors.textSecondary }]}>Dr. Sharma - General Physician</ThemedText>
+              <ThemedText style={[styles.checkupType, { color: colors.text }]}>{t('generalCheckup')}</ThemedText>
+              <ThemedText style={[styles.checkupDoctor, { color: colors.textSecondary }]}>{t('demoDoctor1')} - {t('generalPhysician')}</ThemedText>
             </View>
           </View>
           <View style={styles.checkupItem}>
@@ -215,18 +215,18 @@ export default function HealthReportScreen() {
               <ThemedText style={[styles.checkupMonth, { color: colors.warning || '#f59e0b' }]}>MAY</ThemedText>
             </View>
             <View style={styles.checkupInfo}>
-              <ThemedText style={[styles.checkupType, { color: colors.text }]}>Blood Test</ThemedText>
-              <ThemedText style={[styles.checkupDoctor, { color: colors.textSecondary }]}>City Diagnostic Center</ThemedText>
+              <ThemedText style={[styles.checkupType, { color: colors.text }]}>{t('bloodTest')}</ThemedText>
+              <ThemedText style={[styles.checkupDoctor, { color: colors.textSecondary }]}>{t('diagnosticCenter')}</ThemedText>
             </View>
           </View>
         </View>
 
         {/* Health Goals */}
         <View style={[styles.goalsCard, { backgroundColor: colors.card }]}>
-          <ThemedText style={[styles.goalsTitle, { color: colors.text }]}>🎯 Health Goals</ThemedText>
+          <ThemedText style={[styles.goalsTitle, { color: colors.text }]}>🎯 {t('healthGoals')}</ThemedText>
           <View style={styles.goalItem}>
             <View style={styles.goalHeader}>
-              <ThemedText style={[styles.goalName, { color: colors.text }]}>Daily Steps</ThemedText>
+              <ThemedText style={[styles.goalName, { color: colors.text }]}>{t('dailySteps')}</ThemedText>
               <ThemedText style={[styles.goalProgress, { color: colors.primary }]}>8,432 / 10,000</ThemedText>
             </View>
             <View style={[styles.goalBar, { backgroundColor: colors.border }]}>
@@ -235,8 +235,8 @@ export default function HealthReportScreen() {
           </View>
           <View style={styles.goalItem}>
             <View style={styles.goalHeader}>
-              <ThemedText style={[styles.goalName, { color: colors.text }]}>Water Intake</ThemedText>
-              <ThemedText style={[styles.goalProgress, { color: colors.primary }]}>5 / 8 glasses</ThemedText>
+              <ThemedText style={[styles.goalName, { color: colors.text }]}>{t('waterIntake')}</ThemedText>
+              <ThemedText style={[styles.goalProgress, { color: colors.primary }]}>5 / 8 {t('glasses')}</ThemedText>
             </View>
             <View style={[styles.goalBar, { backgroundColor: colors.border }]}>
               <View style={[styles.goalFill, { width: '62%', backgroundColor: colors.primary }]} />
@@ -244,8 +244,8 @@ export default function HealthReportScreen() {
           </View>
           <View style={styles.goalItem}>
             <View style={styles.goalHeader}>
-              <ThemedText style={[styles.goalName, { color: colors.text }]}>Sleep Hours</ThemedText>
-              <ThemedText style={[styles.goalProgress, { color: colors.primary }]}>7 / 8 hours</ThemedText>
+              <ThemedText style={[styles.goalName, { color: colors.text }]}>{t('sleepHours')}</ThemedText>
+              <ThemedText style={[styles.goalProgress, { color: colors.primary }]}>7 / 8 {t('hours')}</ThemedText>
             </View>
             <View style={[styles.goalBar, { backgroundColor: colors.border }]}>
               <View style={[styles.goalFill, { width: '87%', backgroundColor: colors.primary }]} />
@@ -255,7 +255,7 @@ export default function HealthReportScreen() {
 
         {metrics.length === 0 && (
           <ThemedText style={[styles.emptyText, { color: colors.textSecondary }]}>
-            No health metrics recorded yet. Start tracking your health!
+            {t('noHealthMetrics')}
           </ThemedText>
         )}
       </ScrollView>

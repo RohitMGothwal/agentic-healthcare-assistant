@@ -13,6 +13,7 @@ import {
   Image,
   Alert,
   Linking,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '../components/Icon';
 import ChatBubble from '../components/ChatBubble';
@@ -40,20 +41,20 @@ interface Specialist {
 const SPECIALISTS_DATA = [
   { id: 'general', nameKey: 'specialist_general', icon: 'medical', descKey: 'desc_general' },
   { id: 'cardiologist', nameKey: 'specialist_cardiologist', icon: 'heart', descKey: 'desc_cardiologist' },
-  { id: 'dermatologist', nameKey: 'specialist_dermatologist', icon: 'body', descKey: 'desc_dermatologist' },
-  { id: 'neurologist', nameKey: 'specialist_neurologist', icon: 'brain', descKey: 'desc_neurologist' },
+  { id: 'dermatologist', nameKey: 'specialist_dermatologist', icon: 'body-outline', descKey: 'desc_dermatologist' },
+  { id: 'neurologist', nameKey: 'specialist_neurologist', icon: 'git-network', descKey: 'desc_neurologist' },
   { id: 'pediatrician', nameKey: 'specialist_pediatrician', icon: 'happy', descKey: 'desc_pediatrician' },
-  { id: 'gynecologist', nameKey: 'specialist_gynecologist', icon: 'woman', descKey: 'desc_gynecologist' },
-  { id: 'orthopedic', nameKey: 'specialist_orthopedic', icon: 'fitness', descKey: 'desc_orthopedic' },
+  { id: 'gynecologist', nameKey: 'specialist_gynecologist', icon: 'female', descKey: 'desc_gynecologist' },
+  { id: 'orthopedic', nameKey: 'specialist_orthopedic', icon: 'barbell', descKey: 'desc_orthopedic' },
   { id: 'psychiatrist', nameKey: 'specialist_psychiatrist', icon: 'happy-outline', descKey: 'desc_psychiatrist' },
   { id: 'dentist', nameKey: 'specialist_dentist', icon: 'sunny', descKey: 'desc_dentist' },
   { id: 'ophthalmologist', nameKey: 'specialist_ophthalmologist', icon: 'eye', descKey: 'desc_ophthalmologist' },
-  { id: 'ent', nameKey: 'specialist_ent', icon: 'ear', descKey: 'desc_ent' },
+  { id: 'ent', nameKey: 'specialist_ent', icon: 'headset', descKey: 'desc_ent' },
   { id: 'pulmonologist', nameKey: 'specialist_pulmonologist', icon: 'cloud', descKey: 'desc_pulmonologist' },
   { id: 'gastroenterologist', nameKey: 'specialist_gastroenterologist', icon: 'restaurant', descKey: 'desc_gastroenterologist' },
   { id: 'endocrinologist', nameKey: 'specialist_endocrinologist', icon: 'water', descKey: 'desc_endocrinologist' },
-  { id: 'oncologist', nameKey: 'specialist_oncologist', icon: 'ribbon', descKey: 'desc_oncologist' },
-  { id: 'urologist', nameKey: 'specialist_urologist', icon: 'man', descKey: 'desc_urologist' },
+  { id: 'oncologist', nameKey: 'specialist_oncologist', icon: 'medal', descKey: 'desc_oncologist' },
+  { id: 'urologist', nameKey: 'specialist_urologist', icon: 'male', descKey: 'desc_urologist' },
   { id: 'nephrologist', nameKey: 'specialist_nephrologist', icon: 'water-outline', descKey: 'desc_nephrologist' },
   { id: 'rheumatologist', nameKey: 'specialist_rheumatologist', icon: 'hand-left', descKey: 'desc_rheumatologist' },
   { id: 'allergist', nameKey: 'specialist_allergist', icon: 'leaf', descKey: 'desc_allergist' },
@@ -82,6 +83,9 @@ export default function ChatScreen() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [selectedSpecialist, setSelectedSpecialist] = useState<Specialist>(SPECIALISTS[0]);
   const [showSpecialistModal, setShowSpecialistModal] = useState(false);
+  const [showSymptomAnalysis, setShowSymptomAnalysis] = useState(false);
+  const [symptomAnalysis, setSymptomAnalysis] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const chatHistoryRef = useRef<ChatMessage[]>([]);
 
@@ -152,10 +156,16 @@ export default function ChatScreen() {
     setMessage('');
     setIsLoading(true);
 
+    // Generate unique request ID to prevent duplicate processing
+    const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     try {
+      console.log(`Sending message with requestId: ${requestId}...`);
+      
       const response = await chatApi.sendMessage(trimmed, language);
       const botTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
+      // Check if message with this ID already exists to prevent duplicates
       const botMessage: ChatMessage = {
         id: response.id,
         text: response.message,
@@ -163,21 +173,42 @@ export default function ChatScreen() {
         created_at: response.created_at,
         timestamp: botTimestamp,
       };
-      setChat((current) => [...current, botMessage]);
+      
+      setChat((current) => {
+        // Prevent duplicate messages by checking ID
+        const exists = current.some(msg => msg.id === response.id);
+        if (exists) {
+          console.log('Duplicate message detected, skipping');
+          return current;
+        }
+        return [...current, botMessage];
+      });
     } catch (err) {
       console.error('Failed to send message:', err);
       setChat((current) => [
         ...current,
         { 
-          text: t('serverError'),
+          text: t('serverError') + ' (Please try again)',
           user: false,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
-    } finally {
-      setIsLoading(false);
     }
-  }, [message, isLoading, t]);
+
+    if (!success) {
+      console.error('All attempts failed:', lastError);
+      setChat((current) => [
+        ...current,
+        { 
+          text: t('serverError') + ' (Please try again)',
+          user: false,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
+    }
+    
+    setIsLoading(false);
+  }, [message, isLoading, t, language]);
 
   const handleVoiceResult = (text: string) => {
     setMessage(text);
@@ -212,6 +243,23 @@ export default function ChatScreen() {
     const message = 'I need medical assistance';
     Linking.openURL(`sms:${phoneNumber}?body=${encodeURIComponent(message)}`);
   };
+
+  const analyzeSymptoms = useCallback(async () => {
+    const trimmed = message.trim();
+    if (!trimmed || isAnalyzing) return;
+
+    setIsAnalyzing(true);
+    try {
+      const result = await chatApi.analyzeSymptoms(trimmed);
+      setSymptomAnalysis(result);
+      setShowSymptomAnalysis(true);
+    } catch (err) {
+      console.error('Failed to analyze symptoms:', err);
+      Alert.alert(t('error'), 'Failed to analyze symptoms. Please try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [message, isAnalyzing, t]);
 
   if (isLoadingHistory) {
     return (
@@ -396,6 +444,80 @@ export default function ChatScreen() {
         </View>
       )}
 
+        {/* Symptom Analysis Modal */}
+        <Modal
+          visible={showSymptomAnalysis}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowSymptomAnalysis(false)}
+        >
+          <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+            <View style={[styles.symptomAnalysisContainer, { backgroundColor: colors.card }]}>
+              <View style={styles.symptomAnalysisHeader}>
+                <Text style={[styles.symptomAnalysisTitle, { color: colors.text }]}>
+                  🏥 Symptom Analysis
+                </Text>
+                <TouchableOpacity onPress={() => setShowSymptomAnalysis(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+              
+              <ScrollView style={styles.symptomAnalysisContent}>
+                {symptomAnalysis?.conditions?.length > 0 ? (
+                  <>
+                    <Text style={[styles.analysisSubtitle, { color: colors.textSecondary }]}>
+                      Possible conditions based on your symptoms:
+                    </Text>
+                    {symptomAnalysis.conditions.map((condition: any, index: number) => (
+                      <View key={index} style={[styles.conditionCard, { backgroundColor: colors.background }]}>
+                        <View style={styles.conditionHeader}>
+                          <Text style={[styles.conditionName, { color: colors.text }]}>
+                            {condition.condition}
+                          </Text>
+                          <View style={[
+                            styles.urgencyBadge,
+                            { backgroundColor: 
+                              condition.urgency?.toLowerCase() === 'high' ? colors.error :
+                              condition.urgency?.toLowerCase() === 'medium' ? colors.warning || '#f59e0b' :
+                              colors.success
+                            }
+                          ]}>
+                            <Text style={styles.urgencyText}>{condition.urgency}</Text>
+                          </View>
+                        </View>
+                        
+                        <Text style={[styles.conditionSymptoms, { color: colors.textSecondary }]}>
+                          <Text style={{ fontWeight: 'bold' }}>Symptoms: </Text>
+                          {condition.matching_symptoms?.join(', ')}
+                        </Text>
+                        
+                        <Text style={[styles.conditionTreatment, { color: colors.textSecondary }]}>
+                          <Text style={{ fontWeight: 'bold' }}>Treatment: </Text>
+                          {condition.treatment}
+                        </Text>
+                      </View>
+                    ))}
+                    
+                    <View style={[styles.disclaimerCard, { backgroundColor: colors.error + '10' }]}>
+                      <Ionicons name="warning" size={20} color={colors.error} />
+                      <Text style={[styles.disclaimerText, { color: colors.text }]}>
+                        {symptomAnalysis?.disclaimer}
+                      </Text>
+                    </View>
+                  </>
+                ) : (
+                  <View style={styles.noResultsContainer}>
+                    <Ionicons name="search" size={48} color={colors.textSecondary} />
+                    <Text style={[styles.noResultsText, { color: colors.textSecondary }]}>
+                      No matching conditions found. Please consult a healthcare professional.
+                    </Text>
+                  </View>
+                )}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
       {/* Chat Messages */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -454,14 +576,7 @@ export default function ChatScreen() {
               />
             ))
           )}
-          {isLoading && (
-            <View style={styles.typingIndicator}>
-              <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={[styles.typingText, { color: colors.textSecondary }]}>
-                {t('aiTyping')}
-              </Text>
-            </View>
-          )}
+
         </ScrollView>
 
         {/* Quick Actions */}
@@ -478,13 +593,17 @@ export default function ChatScreen() {
             <Ionicons name="logo-whatsapp" size={20} color={colors.success} />
             <Text style={[styles.quickActionText, { color: colors.textSecondary }]}>{t('whatsapp')}</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.quickActionBtn} onPress={analyzeSymptoms} disabled={isAnalyzing || !message.trim()}>
+            <Ionicons name="medical" size={20} color={isAnalyzing || !message.trim() ? colors.textSecondary : colors.primary} />
+            <Text style={[styles.quickActionText, { color: isAnalyzing || !message.trim() ? colors.textSecondary : colors.text }]}>
+              {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        {/* Voice Input */}
-        <VoiceInput onResult={handleVoiceResult} />
 
         {/* Input Area */}
         <View style={[styles.inputContainer, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
+          <VoiceInput onResult={handleVoiceResult} />
           <TextInput
             style={[styles.textInput, { backgroundColor: colors.background, color: colors.text }]}
             placeholder={t('typeMessage')}
@@ -849,5 +968,86 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
+  },
+  // Symptom Analysis Styles
+  symptomAnalysisContainer: {
+    borderRadius: 24,
+    width: '90%',
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  symptomAnalysisHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  symptomAnalysisTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  symptomAnalysisContent: {
+    padding: 20,
+  },
+  analysisSubtitle: {
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  conditionCard: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  conditionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  conditionName: {
+    fontSize: 16,
+    fontWeight: '700',
+    flex: 1,
+  },
+  urgencyBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  urgencyText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  conditionSymptoms: {
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  conditionTreatment: {
+    fontSize: 13,
+  },
+  disclaimerCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  disclaimerText: {
+    fontSize: 13,
+    marginLeft: 10,
+    flex: 1,
+  },
+  noResultsContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  noResultsText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 16,
+    paddingHorizontal: 20,
   },
 });

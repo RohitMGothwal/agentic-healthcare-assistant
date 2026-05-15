@@ -17,6 +17,7 @@ import AdminContentScreen from '../screens/AdminContentScreen';
 import AdminSystemScreen from '../screens/AdminSystemScreen';
 import AdminLogsScreen from '../screens/AdminLogsScreen';
 import { useTheme } from '../hooks/useTheme';
+import { useLanguage } from '../hooks/useLanguage';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -46,6 +47,7 @@ function TabIcon({ icon, label, focused, colors }: { icon: string; label: string
 
 function MainTabs() {
   const { colors, isDark } = useTheme();
+  const { t } = useLanguage();
 
   return (
     <Tab.Navigator
@@ -72,9 +74,9 @@ function MainTabs() {
         name="HealthReport"
         component={HealthReportScreen}
         options={{
-          title: 'Health',
+          title: t('healthReport'),
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "heart" : "heart-outline"} label="Health" focused={focused} colors={colors} />
+            <TabIcon icon={focused ? "heart" : "heart-outline"} label={t('healthReport')} focused={focused} colors={colors} />
           ),
         }}
       />
@@ -83,7 +85,7 @@ function MainTabs() {
         component={ChatScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "chatbubble" : "chatbubble-outline"} label="Chat" focused={focused} colors={colors} />
+            <TabIcon icon={focused ? "chatbubble" : "chatbubble-outline"} label={t('chat')} focused={focused} colors={colors} />
           ),
         }}
       />
@@ -92,7 +94,7 @@ function MainTabs() {
         component={DashboardScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="grid" label="Dashboard" focused={focused} colors={colors} />
+            <TabIcon icon="grid" label={t('dashboard')} focused={focused} colors={colors} />
           ),
         }}
       />
@@ -101,7 +103,7 @@ function MainTabs() {
         component={AppointmentsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "calendar" : "calendar-outline"} label="Appointments" focused={focused} colors={colors} />
+            <TabIcon icon={focused ? "calendar" : "calendar-outline"} label={t('appointments')} focused={focused} colors={colors} />
           ),
         }}
       />
@@ -110,7 +112,7 @@ function MainTabs() {
         component={SettingsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon={focused ? "settings" : "settings-outline"} label="Settings" focused={focused} colors={colors} />
+            <TabIcon icon={focused ? "settings" : "settings-outline"} label={t('settings')} focused={focused} colors={colors} />
           ),
         }}
       />
