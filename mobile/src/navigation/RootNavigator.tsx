@@ -16,6 +16,7 @@ import AdminAppointmentsScreen from '../screens/AdminAppointmentsScreen';
 import AdminContentScreen from '../screens/AdminContentScreen';
 import AdminSystemScreen from '../screens/AdminSystemScreen';
 import AdminLogsScreen from '../screens/AdminLogsScreen';
+import ComingSoonScreen from '../screens/ComingSoonScreen';
 import { useTheme } from '../hooks/useTheme';
 import { useLanguage } from '../hooks/useLanguage';
 
@@ -133,6 +134,7 @@ export default function RootNavigator() {
       <Stack.Screen name="AdminContent" component={AdminContentScreen} />
       <Stack.Screen name="AdminSystem" component={AdminSystemScreen} />
       <Stack.Screen name="AdminLogs" component={AdminLogsScreen} />
+      <Stack.Screen name="ComingSoon" component={ComingSoonScreen} />
     </Stack.Navigator>
   );
 }

@@ -207,6 +207,17 @@ export default function DashboardScreen() {
               </View>
               <ThemedText style={[styles.quickActionText, { color: colors.text }]}>{t('settings')}</ThemedText>
             </TouchableOpacity>
+
+            {/* Coming Soon - Future Features */}
+            <TouchableOpacity 
+              style={[styles.quickActionItem, { backgroundColor: colors.card }]}
+              onPress={() => navigation.navigate('ComingSoon' as never)}
+            >
+              <View style={[styles.quickActionIcon, { backgroundColor: '#8b5cf6' + '20' }]}>
+                <Ionicons name="rocket" size={24} color="#8b5cf6" />
+              </View>
+              <ThemedText style={[styles.quickActionText, { color: colors.text }]}>Coming Soon</ThemedText>
+            </TouchableOpacity>
           </View>
         </View>
 
