@@ -86,8 +86,12 @@ export default function ChatScreen() {
   const [showSymptomAnalysis, setShowSymptomAnalysis] = useState(false);
   const [symptomAnalysis, setSymptomAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const chatHistoryRef = useRef<ChatMessage[]>([]);
+  const isSendingRef = useRef(false);
+  const messageRef = useRef('');
+  const lastSendTimeRef = useRef(0);
 
   // Generate welcome message based on current language
   const generateWelcomeMessage = useCallback((): ChatMessage => ({
@@ -141,20 +145,50 @@ export default function ChatScreen() {
   }, [language, generateWelcomeMessage]);
 
   const sendMessage = useCallback(async () => {
-    const trimmed = message.trim();
-    if (!trimmed || isLoading) return;
+    // Use a local ref to get the current message value to avoid closure issues
+    const currentMessage = messageRef.current.trim();
+    
+    // Multiple guards to prevent duplicate sends
+    if (!currentMessage) {
+      console.log('Send blocked: empty message');
+      return;
+    }
+    if (isLoading) {
+      console.log('Send blocked: already loading');
+      return;
+    }
+    if (isSendingRef.current) {
+      console.log('Send blocked: already sending');
+      return;
+    }
+
+    // Debounce: prevent sending within 2000ms of last send
+    const now = Date.now();
+    if (now - lastSendTimeRef.current < 2000) {
+      console.log('Send blocked: debounced (within 2 seconds)');
+      return;
+    }
+    lastSendTimeRef.current = now;
+
+    // Prevent duplicate sends
+    isSendingRef.current = true;
+    
+    // Clear input immediately to prevent double-send
+    setMessage('');
+    messageRef.current = '';
 
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     // Optimistically add user message
     const userMessage: ChatMessage = { 
-      text: trimmed, 
+      text: currentMessage, 
       user: true,
       timestamp,
     };
     setChat((current) => [...current, userMessage]);
-    setMessage('');
     setIsLoading(true);
+    
+    console.log('Message sent:', currentMessage);
 
     // Generate unique request ID to prevent duplicate processing
     const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -162,7 +196,7 @@ export default function ChatScreen() {
     try {
       console.log(`Sending message with requestId: ${requestId}...`);
       
-      const response = await chatApi.sendMessage(trimmed, language);
+      const response = await chatApi.sendMessage(currentMessage, language);
       const botTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
       // Check if message with this ID already exists to prevent duplicates
@@ -193,25 +227,15 @@ export default function ChatScreen() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
+    } finally {
+      setIsLoading(false);
+      isSendingRef.current = false;
     }
-
-    if (!success) {
-      console.error('All attempts failed:', lastError);
-      setChat((current) => [
-        ...current,
-        { 
-          text: t('serverError') + ' (Please try again)',
-          user: false,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
-    }
-    
-    setIsLoading(false);
-  }, [message, isLoading, t, language]);
+  }, [isLoading, t, language]);
 
   const handleVoiceResult = (text: string) => {
     setMessage(text);
+    messageRef.current = text;
   };
 
   const scrollToBottom = () => {
@@ -219,18 +243,7 @@ export default function ChatScreen() {
   };
 
   const handleWhatsApp = () => {
-    const phoneNumber = '+911234567890';
-    const message = 'Hello, I need medical assistance';
-    const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(url);
-        } else {
-          Alert.alert(t('error'), t('whatsappNotInstalled'));
-        }
-      })
-      .catch((err) => console.error('Error opening WhatsApp:', err));
+    setShowWhatsAppModal(true);
   };
 
   const handleCall = () => {
@@ -518,6 +531,78 @@ export default function ChatScreen() {
           </View>
         </Modal>
 
+        {/* WhatsApp Integration Modal */}
+        <Modal
+          visible={showWhatsAppModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowWhatsAppModal(false)}
+        >
+          <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.6)' }]}>
+            <View style={[styles.comingSoonContainer, { backgroundColor: colors.card }]}>
+              <View style={styles.comingSoonHeader}>
+                <View style={[styles.iconContainer, { backgroundColor: '#25D366' + '20' }]}>
+                  <Ionicons name="logo-whatsapp" size={40} color="#25D366" />
+                </View>
+                <Text style={[styles.comingSoonTitle, { color: colors.text }]}>
+                  WhatsApp Integration
+                </Text>
+                <Text style={[styles.comingSoonSubtitle, { color: colors.textSecondary }]}>
+                  Coming Soon
+                </Text>
+              </View>
+              
+              <View style={styles.statusContainer2}>
+                <View style={[styles.statusBadge, { backgroundColor: colors.warning + '20' }]}>
+                  <Ionicons name="time" size={16} color={colors.warning} />
+                  <Text style={[styles.statusText2, { color: colors.warning }]}>
+                    Under Negotiation
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.divider} />
+
+              <Text style={[styles.comingSoonDescription, { color: colors.textSecondary }]}>
+                We are currently in discussions with WhatsApp Business API providers to bring you seamless healthcare communication directly through WhatsApp.
+              </Text>
+
+              <View style={styles.featuresList}>
+                <View style={styles.featureRow}>
+                  <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={[styles.featureText2, { color: colors.text }]}>Instant chat with healthcare providers</Text>
+                </View>
+                <View style={styles.featureRow}>
+                  <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={[styles.featureText2, { color: colors.text }]}>Appointment reminders & notifications</Text>
+                </View>
+                <View style={styles.featureRow}>
+                  <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={[styles.featureText2, { color: colors.text }]}>Secure medical report sharing</Text>
+                </View>
+                <View style={styles.featureRow}>
+                  <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={[styles.featureText2, { color: colors.text }]}>24/7 AI health assistant access</Text>
+                </View>
+              </View>
+
+              <View style={[styles.infoBox, { backgroundColor: colors.primary + '10' }]}>
+                <Ionicons name="information-circle" size={20} color={colors.primary} />
+                <Text style={[styles.infoText, { color: colors.text }]}>
+                  Expected launch: Q3 2026. Stay tuned for updates!
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.closeButton, { backgroundColor: colors.primary }]}
+                onPress={() => setShowWhatsAppModal(false)}
+              >
+                <Text style={styles.closeButtonText}>Got it</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
       {/* Chat Messages */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -609,9 +694,14 @@ export default function ChatScreen() {
             placeholder={t('typeMessage')}
             placeholderTextColor={colors.textSecondary}
             value={message}
-            onChangeText={setMessage}
+            onChangeText={(text) => {
+              setMessage(text);
+              messageRef.current = text;
+            }}
             onSubmitEditing={sendMessage}
-            multiline
+            blurOnSubmit={false}
+            returnKeyType="send"
+            multiline={false}
             maxLength={500}
             editable={!isLoading}
           />
@@ -1049,5 +1139,110 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
     paddingHorizontal: 20,
+  },
+  // WhatsApp Coming Soon Modal Styles
+  comingSoonContainer: {
+    borderRadius: 24,
+    width: '85%',
+    maxWidth: 360,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  comingSoonHeader: {
+    alignItems: 'center',
+    paddingTop: 28,
+    paddingHorizontal: 24,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  comingSoonTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  comingSoonSubtitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 1,
+  },
+  statusContainer2: {
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+  },
+  statusText2: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+    marginHorizontal: 24,
+    marginVertical: 16,
+  },
+  comingSoonDescription: {
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+    paddingHorizontal: 24,
+    marginBottom: 20,
+  },
+  featuresList: {
+    paddingHorizontal: 24,
+    marginBottom: 20,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 12,
+  },
+  featureText2: {
+    fontSize: 14,
+    flex: 1,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 24,
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 20,
+    gap: 10,
+  },
+  infoText: {
+    fontSize: 13,
+    flex: 1,
+    lineHeight: 18,
+  },
+  closeButton: {
+    marginHorizontal: 24,
+    marginBottom: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

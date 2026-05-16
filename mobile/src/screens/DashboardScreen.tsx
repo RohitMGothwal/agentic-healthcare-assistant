@@ -132,7 +132,10 @@ export default function DashboardScreen() {
             <ThemedText style={[styles.greeting, { color: colors.textSecondary }]}>{greeting}</ThemedText>
             <ThemedText style={[styles.userName, { color: colors.text }]}>{user?.username || t('guest')} 👋</ThemedText>
           </View>
-          <TouchableOpacity style={[styles.profileButton, { backgroundColor: colors.card }]}>
+          <TouchableOpacity 
+            style={[styles.profileButton, { backgroundColor: colors.card }]}
+            onPress={() => navigation.navigate('Profile' as never)}
+          >
             <Ionicons name="person" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>

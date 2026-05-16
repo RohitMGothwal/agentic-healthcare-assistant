@@ -16,7 +16,7 @@ class LocalHealthAIService:
     Service to connect to the local rule-based Healthcare AI
     """
     
-    def __init__(self, base_url: str = "http://172.28.9.126:8001"):
+    def __init__(self, base_url: str = "http://172.28.9.9:8001"):
         self.base_url = base_url
         self.timeout = 10
         

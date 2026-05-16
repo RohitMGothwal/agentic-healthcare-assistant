@@ -17,6 +17,13 @@ import AdminContentScreen from '../screens/AdminContentScreen';
 import AdminSystemScreen from '../screens/AdminSystemScreen';
 import AdminLogsScreen from '../screens/AdminLogsScreen';
 import ComingSoonScreen from '../screens/ComingSoonScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import RateAppScreen from '../screens/RateAppScreen';
+import LanguageScreen from '../screens/LanguageScreen';
+import FAQScreen from '../screens/FAQScreen';
+import ReportBugScreen from '../screens/ReportBugScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import TermsOfServiceScreen from '../screens/TermsOfServiceScreen';
 import { useTheme } from '../hooks/useTheme';
 import { useLanguage } from '../hooks/useLanguage';
 
@@ -135,6 +142,13 @@ export default function RootNavigator() {
       <Stack.Screen name="AdminSystem" component={AdminSystemScreen} />
       <Stack.Screen name="AdminLogs" component={AdminLogsScreen} />
       <Stack.Screen name="ComingSoon" component={ComingSoonScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="RateApp" component={RateAppScreen} />
+      <Stack.Screen name="Language" component={LanguageScreen} />
+      <Stack.Screen name="FAQ" component={FAQScreen} />
+      <Stack.Screen name="ReportBug" component={ReportBugScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
     </Stack.Navigator>
   );
 }

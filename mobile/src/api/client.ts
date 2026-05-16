@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
 // 
 // For iOS Simulator, use your Mac's IP address (find it with: ifconfig | grep inet)
 // Example: http://192.168.1.100:8000
-const DEV_API_URL = 'http://172.28.9.126:8000/api/v1'; // Your Mac's IP address with API prefix
+const DEV_API_URL = 'http://172.28.9.9:8000/api/v1'; // Your Mac's IP address with API prefix
 
 const getBaseURL = () => {
   const isDev = __DEV__;
